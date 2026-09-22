@@ -271,6 +271,130 @@ tests/unit/test_workflow.py::test_step_budget_exhaustion_in_human_review_loop PA
 
 ---
 
+## Phase 11: India-First Localization (INR ₹, BHK, RERA Carpet Area, Major Indian Metros)
+
+### What Was Built & Localized
+1. **Indian Currency & Numbering Standards ([formatters.py](file:///c:/Users/Venkat/Desktop/Sat%20Datta%20Projects/DynamicPricingAgent/src/core/formatters.py))**:
+   - `indian_comma_format()`: Groups rightmost 3 digits, then pairs of 2 digits (e.g. `₹1,65,00,000`).
+   - `format_inr()`: Formats amounts with optional word conversion (`₹1.65 Crore`, `₹85 Lakh`).
+   - `format_inr_short()`: Short badge/chart notation (`₹1.65 Cr`, `₹85.00 L`, `₹65.0 k`).
+   - `format_rent()`: Monthly rent with `/month` or `/mo` notation.
+   - `format_psf()`: Per square foot rates (`₹/sq ft`).
+   - `format_bhk()`: Layout notation (`1 BHK`, `2 BHK`, `3 BHK`, `Studio / 1 RK`).
+
+2. **Domain Models & Enums ([enums.py](file:///c:/Users/Venkat/Desktop/Sat%20Datta%20Projects/DynamicPricingAgent/src/core/enums.py), [models.py](file:///c:/Users/Venkat/Desktop/Sat%20Datta%20Projects/DynamicPricingAgent/src/core/models.py))**:
+   - `PropertyType`: Added `APARTMENT`, `INDEPENDENT_HOUSE`, `VILLA`, `ROW_HOUSE`, `PLOT`, `COMMERCIAL` with backward-compatible aliases and human-readable `.display_name`.
+   - `PropertyProfile`: Added `locality`, `carpet_area_sqft` (RERA Carpet Area), `pin_code`, and `bhk_display`.
+   - `MarketRecord`: Added `locality`, `carpet_area_sqft`, and `pin_code`.
+   - `RentRollUnit`: Added `bhk_display`.
+   - Standardized `currency: str = "INR"` and `currency_symbol: str = "₹"` across all domain models (`ValuationResult`, `RentalPricingResult`, `CMAAnalysis`, `RentRollSummary`, `HumanReviewDecision`).
+   - Updated legal disclaimer to Indian statutory notice referencing Sub-Registrar / Municipal records.
+
+3. **Deterministic Calculation Engines**:
+   - `ComparableEngine` / `AdjustmentEngine`: Calibrated adjustment rates to Indian scales (₹2,500/sqft, ₹5L/bed, ₹2L/bath, ₹35k/yr age, ₹2.5L/condition step, ₹2L/parking, ₹1.5L/amenity), floor price ₹5,00,000.
+   - `DynamicPricingEngine`: Calibrated base rental rate fallback to ₹25.00/sqft/mo, rounding to ₹500 increments, min rent ₹5,00,000 / ₹5,000 floor.
+   - `DeterministicValuationEngine`: Calibrated fallback sales PSF to ₹7,500/sqft, rounding to thousands, min valuation ₹5,00,000.
+   - `RiskQualityEngine`, `MarketConditionsEngine`, `LeaseAnalysisEngine`: Updated all factual and interpretation strings to INR (₹).
+
+4. **Realistic Indian Market Fixtures ([fixtures/](file:///c:/Users/Venkat/Desktop/Sat%20Datta%20Projects/DynamicPricingAgent/src/data/fixtures/))**:
+   - Flagship property: **Hyderabad HITEC City / Gachibowli** (`PROP-HYD-001` - My Home Bhooja, 3 BHK, 1850 sq ft, ₹1.65 Cr).
+   - Additional fixtures across **Bengaluru** (Prestige Shantiniketan, Whitefield), **Mumbai** (Hiranandani Gardens, Powai), **Pune** (Megapolis Splendida, Hinjewadi), and **Visakhapatnam** (Sea Breeze Heights, Beach Road).
+   - Maintained backward-compatible test fixtures for continuous regression stability.
+
+5. **Streamlit Executive Dashboard & Visualizations ([app.py](file:///c:/Users/Venkat/Desktop/Sat%20Datta%20Projects/DynamicPricingAgent/src/ui/app.py), [visualizations.py](file:///c:/Users/Venkat/Desktop/Sat%20Datta%20Projects/DynamicPricingAgent/src/ui/visualizations.py))**:
+   - Pre-loaded Indian demo selector with Hyderabad, Bengaluru, Mumbai, Pune, and Vizag.
+   - Custom property intake form with Indian cities, Indian states, PIN code, and BHK layout dropdowns.
+   - Plotly scatter, waterfall, trend, and cliff charts formatted with Indian currency units (`₹`, `Cr`, `L`, `k`, `₹/sq ft`, `₹/mo`).
+   - Metric cards displaying values in Crores and Lakhs with `indian_comma_format`.
+
+6. **Reporting & Compliance Dossier ([reporter.py](file:///c:/Users/Venkat/Desktop/Sat%20Datta%20Projects/DynamicPricingAgent/src/reporting/reporter.py))**:
+   - Executive Markdown dossier formatted in INR with Super Built-up Area, RERA Carpet Area, BHK layout, and Indian statutory notices.
+   - Machine-readable JSON export with `"currency": "INR"`, `"currency_symbol": "₹"`, and `"locale": "en_IN"`.
+
+### Test Suite Verification (73 Tests Passing)
+
+Ran: `python -m pytest tests/ -v`
+
+```
+tests/integration/test_end_to_end_integration.py::test_full_pipeline_end_to_end_lifecycle PASSED [  1%]
+tests/integration/test_end_to_end_integration.py::test_pipeline_modification_lifecycle PASSED [  2%]
+tests/integration/test_end_to_end_integration.py::test_pipeline_determinism_across_multiple_runs PASSED [  4%]
+tests/unit/test_cma.py::test_property_intake_normalization PASSED        [  5%]
+tests/unit/test_cma.py::test_similarity_calculator_identical_vs_dissimilar PASSED [  6%]
+tests/unit/test_cma.py::test_similarity_custom_weights PASSED            [  8%]
+tests/unit/test_cma.py::test_appraisal_adjustments_rule PASSED           [  9%]
+tests/unit/test_outlier_detection_iqr_and_zscore PASSED     [ 10%]
+tests/unit/test_cma.py::test_cma_engine_end_to_end_with_synthetic_records PASSED [ 12%]
+tests/unit/test_cma.py::test_cma_engine_no_matching_comps_graceful_handling PASSED [ 13%]
+tests/unit/test_indian_localization.py::test_indian_formatters_currency_constants PASSED [ 15%]
+tests/unit/test_indian_localization.py::test_indian_comma_formatting PASSED [ 16%]
+tests/unit/test_indian_localization.py::test_format_inr_crore_and_lakh PASSED [ 17%]
+tests/unit/test_indian_localization.py::test_format_inr_short PASSED     [ 19%]
+tests/unit/test_indian_localization.py::test_format_rent_and_psf PASSED  [ 20%]
+tests/unit/test_format_bhk PASSED           [ 21%]
+tests/unit/test_indian_property_types_and_aliases PASSED [ 23%]
+tests/unit/test_property_intake_indian_fields PASSED [ 24%]
+tests/unit/test_pipeline_end_to_end_hyderabad_flagship PASSED [ 26%]
+tests/unit/test_lease_and_market.py::test_lease_analysis_engine_metrics PASSED [ 27%]
+tests/unit/test_lease_and_market.py::test_lease_expiration_cliff_analysis PASSED [ 28%]
+tests/unit/test_lease_and_market.py::test_tenant_pii_strict_protection PASSED [ 30%]
+tests/unit/test_lease_and_market.py::test_lease_fact_vs_interpretation_separation PASSED [ 31%]
+tests/unit/test_lease_and_market.py::test_market_conditions_cagr_and_momentum PASSED [ 32%]
+tests/unit/test_lease_and_market.py::test_market_conditions_edge_cases PASSED [ 34%]
+tests/unit/test_lease_and_market.py::test_deterministic_reproducibility PASSED [ 35%]
+tests/unit/test_models.py::test_provenance_enforces_synthetic_label PASSED [ 36%]
+tests/unit/test_models.py::test_property_profile_validation PASSED       [ 38%]
+tests/unit/test_models.py::test_market_record_psf_calculation PASSED     [ 39%]
+tests/unit/test_models.py::test_cma_adjustment_model PASSED              [ 41%]
+tests/unit/test_models.py::test_rent_roll_pii_protection PASSED          [ 42%]
+tests/unit/test_models.py::test_valuation_result_contains_mandatory_disclaimer PASSED [ 43%]
+tests/unit/test_models.py::test_human_review_decision_tracking PASSED    [ 45%]
+tests/unit/test_providers.py::test_provider_provenance_integrity PASSED  [ 46%]
+tests/unit/test_providers.py::test_sales_comps_filtering_by_distance_and_sqft PASSED [ 47%]
+tests/unit/test_providers.py::test_rental_comps_query PASSED             [ 49%]
+tests/unit/test_providers.py::test_market_trends_retrieval PASSED        [ 50%]
+tests/unit/test_rent_roll_units_and_anonymization PASSED [ 52%]
+tests/unit/test_rent_roll_summary_calculations PASSED [ 53%]
+tests/unit/test_rent_roll_missing_property PASSED     [ 54%]
+tests/unit/test_reporting.py::test_markdown_dossier_required_sections_and_disclaimers PASSED [ 56%]
+tests/unit/test_reporting.py::test_json_export_structure_and_serialization PASSED [ 57%]
+tests/unit/test_reporting.py::test_human_review_approval_decision_preservation PASSED [ 58%]
+tests/unit/test_reporting.py::test_human_review_modify_decision_with_overrides PASSED [ 60%]
+tests/unit/test_reporting.py::test_human_review_reject_decision PASSED   [ 61%]
+tests/unit/test_reporting.py::test_deterministic_reproducibility PASSED  [ 63%]
+tests/unit/test_reporting.py::test_graceful_missing_and_partial_data_handling PASSED [ 64%]
+tests/unit/test_risk_and_review.py::test_risk_quality_engine_insufficient_comps PASSED [ 65%]
+tests/unit/test_risk_and_review.py::test_risk_quality_engine_stale_data_and_variance PASSED [ 67%]
+tests/unit/test_human_review_approve PASSED                             [ 68%]
+tests/unit/test_human_review_modify_success PASSED                      [ 69%]
+tests/unit/test_human_review_modify_validation_enforcement PASSED       [ 71%]
+tests/unit/test_human_review_reject PASSED                              [ 72%]
+tests/unit/test_human_review_request_more_evidence PASSED                [ 73%]
+tests/unit/test_ui_and_visualizations.py::test_demo_properties_structure PASSED [ 75%]
+tests/unit/test_ui_and_visualizations.py::test_plot_comps_scatter PASSED [ 76%]
+tests/unit/test_ui_and_visualizations.py::test_plot_cma_waterfall PASSED [ 78%]
+tests/unit/test_ui_and_visualizations.py::test_plot_historical_psf_trend PASSED [ 79%]
+tests/unit/test_ui_and_visualizations.py::test_plot_lease_cliff_ladder PASSED [ 80%]
+tests/unit/test_ui_and_visualizations.py::test_dashboard_full_lifecycle_state_flow PASSED [ 82%]
+tests/unit/test_valuation_and_pricing.py::test_deterministic_valuation_with_cma_and_income PASSED [ 83%]
+tests/unit/test_valuation_and_pricing.py::test_valuation_missing_data_fallbacks PASSED [ 84%]
+tests/unit/test_valuation_and_pricing.py::test_dynamic_rental_pricing_floor_midpoint_ceiling PASSED [ 86%]
+tests/unit/test_valuation_and_pricing.py::test_dynamic_pricing_missing_rentals_fallback PASSED [ 87%]
+tests/unit/test_confidence_scoring_tiers PASSED                          [ 89%]
+tests/unit/test_valuation_and_pricing.py::test_deterministic_reproducibility_valuation PASSED [ 90%]
+tests/unit/test_workflow.py::test_end_to_end_pipeline_pauses_at_human_review PASSED [ 91%]
+tests/unit/test_workflow.py::test_human_review_approval_flow PASSED      [ 92%]
+tests/unit/test_workflow.py::test_human_review_modify_flow PASSED        [ 93%]
+tests/unit/test_workflow.py::test_human_review_reject_flow PASSED        [ 95%]
+tests/unit/test_workflow.py::test_human_review_request_more_evidence_flow PASSED [ 96%]
+tests/unit/test_workflow.py::test_cma_radius_expansion_routing PASSED    [ 98%]
+tests/unit/test_workflow.py::test_step_budget_exhaustion_in_human_review_loop PASSED [100%]
+
+============================= 73 passed in 1.86s ==============================
+```
+
+---
+
 ## Known Limitations
 1. **Demonstration Data Fixtures**: All market comps, rents, and submarket trend data are mathematically calibrated synthetic fixtures labeled with the mandatory notice: `"Synthetic demonstration data — not real market data."`
 2. **Export File Formats**: Native exports target GitHub Flavored Markdown (`.md`) and raw serialized JSON (`.json`). Native PDF generation is omitted to prevent heavy C-runtime library dependencies (Cairo/Pango) on Windows environments.
