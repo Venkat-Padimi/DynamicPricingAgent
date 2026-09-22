@@ -162,7 +162,7 @@ class RiskQualityEngine:
                         category="RENT_ROLL",
                         message=(
                             f"Critical lease expiration cliff: {rent_roll_summary.lease_turnover_exposure_pct:.1f}% "
-                            f"of units roll over within 90 days (${rent_roll_summary.expiring_rent_within_90_days:,.0f}/mo at risk)."
+                            f"of units roll over within 90 days (₹{rent_roll_summary.expiring_rent_within_90_days:,.0f}/mo at risk)."
                         ),
                         affected_fields=["lease_turnover_exposure_pct", "expiring_within_90_days"],
                         recommendation="Initiate proactive tenant retention program and budget for turnover concessions.",
@@ -180,7 +180,7 @@ class RiskQualityEngine:
                         category="CONFLICTING_DATA",
                         message=(
                             f"In-place rent diverges by {rental_pricing.rent_gap_percentage:+.1f}% from market recommendation "
-                            f"(${rental_pricing.rent_gap_amount:+,.0f}/mo gap)."
+                            f"(₹{rental_pricing.rent_gap_amount:+,.0f}/mo gap)."
                         ),
                         affected_fields=["rent_gap_amount", "rent_gap_percentage"],
                         recommendation="Confirm whether below-market rent is locked by long-term lease or subsidized covenants.",

@@ -39,23 +39,23 @@ class DeterministicPricingEngine:
             if valid_rents:
                 # Compute rent per sqft
                 rent_psfs = [r.rent_per_sqft for r in valid_rents if r.rent_per_sqft > 0]
-                median_rent_psf = float(np.median(rent_psfs)) if rent_psfs else 2.65
+                median_rent_psf = float(np.median(rent_psfs)) if rent_psfs else 25.0
                 base_comp_rent = round(median_rent_psf * subject.sqft, 2)
                 pricing_drivers.append(
-                    f"Market rental comps established a baseline of ${median_rent_psf:.2f}/sqft "
-                    f"(${base_comp_rent:,.0f}/mo) across {len(valid_rents)} local rental records."
+                    f"Market rental comps established a baseline of ₹{median_rent_psf:.2f}/sqft "
+                    f"(₹{base_comp_rent:,.0f}/mo) across {len(valid_rents)} local rental records."
                 )
             else:
-                base_comp_rent = round(2.65 * subject.sqft, 2)
+                base_comp_rent = round(25.0 * subject.sqft, 2)
         elif market_conditions and market_conditions.historical_points:
             last_pt = market_conditions.historical_points[-1]
             base_comp_rent = round(last_pt.median_rent_psf * subject.sqft, 2)
             pricing_drivers.append(
-                f"Submarket median rental PSF (${last_pt.median_rent_psf:.2f}/sqft) used as baseline (${base_comp_rent:,.0f}/mo)."
+                f"Submarket median rental PSF (₹{last_pt.median_rent_psf:.2f}/sqft) used as baseline (₹{base_comp_rent:,.0f}/mo)."
             )
         else:
-            base_comp_rent = round(2.60 * subject.sqft, 2)
-            pricing_drivers.append(f"Fallback rental baseline applied at $2.60/sqft (${base_comp_rent:,.0f}/mo).")
+            base_comp_rent = round(25.0 * subject.sqft, 2)
+            pricing_drivers.append(f"Fallback rental baseline applied at ₹25.00/sqft (₹{base_comp_rent:,.0f}/mo).")
 
         # 2. Property Condition & Amenity Premium
         condition_factors = {
@@ -75,7 +75,7 @@ class DeterministicPricingEngine:
         if total_feature_pct != 0:
             pricing_drivers.append(
                 f"Property condition ({subject.condition.value}) and {amenities_count} amenities contributed "
-                f"a net adjustment of {total_feature_pct * 100:+.1f}% (${feature_adj:+,.0f}/mo)."
+                f"a net adjustment of {total_feature_pct * 100:+.1f}% (₹{feature_adj:+,.0f}/mo)."
             )
 
         # 3. Occupancy Leverage Adjustment
@@ -103,17 +103,17 @@ class DeterministicPricingEngine:
         if market_conditions and market_conditions.rent_momentum_pct_6m is not None:
             mom_pct = market_conditions.rent_momentum_pct_6m / 100.0
             momentum_adj = round(base_comp_rent * (mom_pct * 0.5), 2)
-            if abs(momentum_adj) > 10.0:
+            if abs(momentum_adj) > 50.0:
                 pricing_drivers.append(
                     f"Submarket 6-month rent momentum ({market_conditions.rent_momentum_pct_6m:+.1f}%) "
-                    f"adjusted recommendation by ${momentum_adj:+,.0f}/mo."
+                    f"adjusted recommendation by ₹{momentum_adj:+,.0f}/mo."
                 )
 
         # Calculate Midpoint & Range
         raw_market_rent = base_comp_rent + feature_adj + occupancy_adj + timing_adj + momentum_adj
-        midpoint = max(500.0, round(raw_market_rent / 25.0) * 25.0)
-        floor_rent = round(midpoint * 0.95 / 25.0) * 25.0
-        ceiling_rent = round(midpoint * 1.06 / 25.0) * 25.0
+        midpoint = max(5000.0, round(raw_market_rent / 500.0) * 500.0)
+        floor_rent = round(midpoint * 0.95 / 500.0) * 500.0
+        ceiling_rent = round(midpoint * 1.06 / 500.0) * 500.0
 
         # In-place Rent & Gap Analysis
         current_rent = None
@@ -128,9 +128,9 @@ class DeterministicPricingEngine:
             rent_gap_amt = round(midpoint - current_rent, 2)
             rent_gap_pct = round((rent_gap_amt / current_rent) * 100, 2)
             pricing_drivers.append(
-                f"Rent gap analysis: in-place rent of ${current_rent:,.0f}/mo is "
-                f"${abs(rent_gap_amt):,.0f} ({abs(rent_gap_pct):.1f}%) {'below' if rent_gap_amt > 0 else 'above'} "
-                f"recommended market midpoint (${midpoint:,.0f}/mo)."
+                f"Rent gap analysis: in-place rent of ₹{current_rent:,.0f}/mo is "
+                f"₹{abs(rent_gap_amt):,.0f} ({abs(rent_gap_pct):.1f}%) {'below' if rent_gap_amt > 0 else 'above'} "
+                f"recommended market midpoint (₹{midpoint:,.0f}/mo)."
             )
 
         # Confidence determination

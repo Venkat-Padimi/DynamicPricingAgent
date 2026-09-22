@@ -181,7 +181,7 @@ def test_appraisal_adjustments_rule(sample_subject):
     assert "Property Condition" in adj_names
 
     sqft_adj = next(a for a in adjustments if a.feature_name == "Square Footage")
-    assert sqft_adj.adjustment_amount == 100.0 * 150.0  # +$15,000
+    assert sqft_adj.adjustment_amount == 100.0 * AdjustmentEngine.SQFT_ADJUSTMENT_RATE  # Subject superior in size
 
 
 def test_outlier_detection_iqr_and_zscore(sample_subject):

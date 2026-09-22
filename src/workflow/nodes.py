@@ -188,8 +188,8 @@ def cma_node(state: AgentWorkflowState) -> AgentWorkflowState:
         action="GENERATE_CMA",
         inputs_summary=f"{len(sales)} sales records evaluated against subject {profile.property_id}",
         outputs_summary=(
-            f"Selected {len(comps)} comps; Adjusted median: ${cma_analysis.adjusted_median_price:,.0f} "
-            f"(${cma_analysis.adjusted_psf_mean:,.0f}/sqft)"
+            f"Selected {len(comps)} comps; Adjusted median: ₹{cma_analysis.adjusted_median_price:,.0f} "
+            f"(₹{cma_analysis.adjusted_psf_mean:,.0f}/sq ft)"
         ),
         sources_consulted=["CMA Engine v1.0"],
         start_time=t0,
@@ -255,7 +255,7 @@ def lease_rentroll_node(
     else:
         out_summary = (
             f"{summary.occupied_units}/{summary.total_units} units occupied ({summary.physical_occupancy_rate*100:.1f}%), "
-            f"${summary.current_in_place_monthly_rent:,.0f}/mo in-place rent. Cliff risk: {summary.cliff_risk_level}"
+            f"₹{summary.current_in_place_monthly_rent:,.0f}/mo in-place rent. Cliff risk: {summary.cliff_risk_level}"
         )
         if summary.cliff_risk_level == "HIGH":
             warnings.append(f"High lease cliff rollover: {summary.lease_turnover_exposure_pct:.1f}% expiring in 90 days.")
@@ -300,11 +300,11 @@ def valuation_node(state: AgentWorkflowState) -> AgentWorkflowState:
         state=state,
         agent_name="Valuation Agent",
         action="CALCULATE_VALUATION",
-        inputs_summary=f"CMA median ${cma.adjusted_median_price:,.0f} + {len(comps)} comps + trend & income components",
+        inputs_summary=f"CMA median ₹{cma.adjusted_median_price:,.0f} + {len(comps)} comps + trend & income components",
         outputs_summary=(
-            f"Estimated Value: ${valuation_res.estimated_value:,.0f} "
-            f"(${valuation_res.valuation_range_low:,.0f} – ${valuation_res.valuation_range_high:,.0f}, "
-            f"${valuation_res.valuation_psf:.0f}/sqft, Confidence: {valuation_res.confidence_level.value})"
+            f"Estimated Value: ₹{valuation_res.estimated_value:,.0f} "
+            f"(₹{valuation_res.valuation_range_low:,.0f} – ₹{valuation_res.valuation_range_high:,.0f}, "
+            f"₹{valuation_res.valuation_psf:.0f}/sq ft, Confidence: {valuation_res.confidence_level.value})"
         ),
         sources_consulted=["Deterministic Valuation Engine v1.0"],
         start_time=t0,
@@ -340,8 +340,8 @@ def dynamic_pricing_node(state: AgentWorkflowState) -> AgentWorkflowState:
         action="CALCULATE_RENTAL_PRICING",
         inputs_summary=f"{len(rentals)} rental comps + occupancy & lease cliff factors",
         outputs_summary=(
-            f"Recommended Rent Midpoint: ${pricing_res.recommended_midpoint:,.0f}/mo "
-            f"(${pricing_res.recommended_rent_range_low:,.0f} – ${pricing_res.recommended_rent_range_high:,.0f}/mo)"
+            f"Recommended Rent Midpoint: ₹{pricing_res.recommended_midpoint:,.0f}/mo "
+            f"(₹{pricing_res.recommended_rent_range_low:,.0f} – ₹{pricing_res.recommended_rent_range_high:,.0f}/mo)"
         ),
         sources_consulted=["Deterministic Pricing Engine v1.0"],
         start_time=t0,
@@ -405,7 +405,7 @@ def human_review_node(state: AgentWorkflowState) -> AgentWorkflowState:
             state=state,
             agent_name="Human Review Agent",
             action="PAUSE_FOR_HUMAN_APPROVAL",
-            inputs_summary=f"AI Valuation: ${val.estimated_value:,.0f}, AI Rent: ${pricing.recommended_midpoint:,.0f}/mo",
+            inputs_summary=f"AI Valuation: ₹{val.estimated_value:,.0f}, AI Rent: ₹{pricing.recommended_midpoint:,.0f}/mo",
             outputs_summary="Workflow paused: Human-in-the-Loop review is required before decision finalization.",
             sources_consulted=[],
             start_time=t0,
@@ -425,8 +425,8 @@ def human_review_node(state: AgentWorkflowState) -> AgentWorkflowState:
             inputs_summary=f"Reviewer: {review.reviewer_name} ({review.reviewer_role})",
             outputs_summary=(
                 f"Decision: {review.status.value}. Notes: '{review.reviewer_notes}'. "
-                f"Overrides: Val=${review.modified_valuation or val.estimated_value:,.0f}, "
-                f"Rent=${review.modified_recommended_rent or pricing.recommended_midpoint:,.0f}/mo"
+                f"Overrides: Val=₹{review.modified_valuation or val.estimated_value:,.0f}, "
+                f"Rent=₹{review.modified_recommended_rent or pricing.recommended_midpoint:,.0f}/mo"
             ),
             sources_consulted=["Human Review Console"],
             start_time=t0,

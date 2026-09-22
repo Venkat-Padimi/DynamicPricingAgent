@@ -5,6 +5,7 @@ from typing import List, Optional
 import pandas as pd
 import streamlit as st
 
+from src.core.formatters import format_inr, format_psf, format_rent
 from src.core.models import RentRollSummary, RentRollUnit
 from src.ui.visualizations import plot_lease_cliff_ladder
 
@@ -13,7 +14,7 @@ def render_rentroll_view(
     summary: Optional[RentRollSummary],
     units: List[RentRollUnit],
 ) -> None:
-    """Render operational rent roll, occupancy rates, and expiration cliff ladder."""
+    """Render operational rent roll, occupancy rates, and expiration cliff ladder in INR."""
     st.markdown("### 🏢 Operational Rent Roll & Lease Cliff Analysis")
 
     if not summary or not units:
@@ -37,14 +38,14 @@ def render_rentroll_view(
     with c3:
         st.metric(
             label="In-Place Monthly Rent",
-            value=f"${summary.current_in_place_monthly_rent:,.0f} / mo",
-            help=f"Gross Annual: ${summary.gross_annual_in_place_rent:,.0f} / yr",
+            value=format_rent(summary.current_in_place_monthly_rent),
+            help=f"Gross Annual: {format_inr(summary.gross_annual_in_place_rent, use_words=True)}",
         )
     with c4:
         st.metric(
             label="90-Day Cliff Risk",
             value=f"{summary.cliff_risk_level} ({summary.lease_turnover_exposure_pct:.0f}%)",
-            delta=f"-${summary.expiring_rent_within_90_days:,.0f}/mo at risk" if summary.expiring_rent_within_90_days > 0 else None,
+            delta=f"-{format_inr(summary.expiring_rent_within_90_days)}/mo at risk" if summary.expiring_rent_within_90_days > 0 else None,
             delta_color="inverse",
             help="Total percentage of building rent rolling over within the next 90 days.",
         )
@@ -58,10 +59,10 @@ def render_rentroll_view(
     unit_rows = [
         {
             "Unit #": u.unit_number,
-            "Bed / Bath": f"{u.bedrooms}B / {u.bathrooms:.0f}Ba",
-            "Area": f"{u.sqft:,.0f} sqft",
-            "In-Place Rent": f"${u.current_rent:,.0f} / mo" if u.current_rent > 0 else "$0 (Vacant)",
-            "Rent PSF": f"${u.in_place_psf:.2f}",
+            "Layout": f"{u.bhk_display} / {u.bathrooms:.0f} Bath",
+            "Area": f"{u.sqft:,.0f} sq ft",
+            "In-Place Rent": format_rent(u.current_rent) if u.current_rent > 0 else "₹0 (Vacant)",
+            "Rent PSF": format_psf(u.in_place_psf),
             "Lease Expiration": u.lease_end,
             "Days to Expire": f"{u.days_until_expiration} days",
             "Lease Status": u.lease_status.value,

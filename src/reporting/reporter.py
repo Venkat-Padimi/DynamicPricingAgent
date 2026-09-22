@@ -6,6 +6,15 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from src.core.enums import DataOrigin, ReviewStatus, RiskSeverity
+from src.core.formatters import (
+    CURRENCY_CODE,
+    CURRENCY_SYMBOL,
+    format_bhk,
+    format_inr,
+    format_inr_short,
+    format_psf,
+    format_rent,
+)
 from src.core.models import (
     LEGAL_DISCLAIMER_TEXT,
     SYNTHETIC_NOTICE_TEXT,
@@ -26,7 +35,7 @@ from src.core.state import AgentWorkflowState
 
 
 class ComplianceDossierReporter:
-    """Institutional reporting engine producing auditable Markdown compliance dossiers and JSON exports."""
+    """Institutional reporting engine producing auditable Markdown compliance dossiers and JSON exports in INR."""
 
     def __init__(self, platform_version: str = "1.0.0"):
         self.platform_version = platform_version
@@ -51,12 +60,12 @@ class ComplianceDossierReporter:
 
         prop_id = profile.property_id if profile else "UNSPECIFIED"
         prop_addr = profile.address if profile else "Unknown Address"
-        prop_loc = f"{profile.city}, {profile.state} {profile.zip_code}" if profile else ""
+        prop_loc = f"{profile.city}, {profile.state} (PIN: {profile.zip_code})" if profile else ""
 
         # ---------------------------------------------------------------------
         # 1. Document Header & Report Metadata
         # ---------------------------------------------------------------------
-        lines.append("# Institutional Valuation & Dynamic Pricing Compliance Dossier")
+        lines.append("# Institutional Valuation & Dynamic Pricing Compliance Dossier (India)")
         lines.append(f"**Asset Identification:** `{prop_id}` — {prop_addr}, {prop_loc}")
         lines.append(f"**Dossier Generation Timestamp:** `{now_utc}` | **Platform Engine Version:** `v{self.platform_version}`")
         lines.append(f"**Workflow Execution Status:** `{workflow_status}`")
@@ -70,8 +79,8 @@ class ComplianceDossierReporter:
         lines.append(f"> {LEGAL_DISCLAIMER_TEXT}")
         lines.append("> ")
         lines.append("> **DECISION-SUPPORT NOTICE:** This system is an automated AI decision-support platform, ")
-        lines.append("> NOT an autonomous or licensed real estate appraiser. All calculated figures represent analytical ")
-        lines.append("> recommendations and require explicit Human-in-the-Loop review and professional validation.")
+        lines.append("> NOT a registered valuation under the Companies Act or an appraisal under Indian law. All calculated figures ")
+        lines.append("> represent analytical recommendations and require explicit Human-in-the-Loop review and professional validation.")
         lines.append("")
         lines.append("> [!WARNING]")
         lines.append("> **DATA PROVENANCE & SYNTHETIC DEMONSTRATION DISCLOSURE:**")
@@ -85,7 +94,7 @@ class ComplianceDossierReporter:
         # ---------------------------------------------------------------------
         lines.append("## 1. Executive Summary & Recommendation Overview")
         lines.append("")
-        lines.append("*The following section summarizes the primary valuation and pricing recommendations. ")
+        lines.append("*The following section summarizes the primary valuation and pricing recommendations in Indian Rupees (INR). ")
         lines.append("Quantitative figures represent deterministic mathematical calculations; strategic commentary ")
         lines.append("represents decision-support recommendations subject to human review.*")
         lines.append("")
@@ -96,21 +105,21 @@ class ComplianceDossierReporter:
             lines.append("### Valuation Determination")
             lines.append("| Metric | Calculated Value | Analytical Description |")
             lines.append("| :--- | :--- | :--- |")
-            lines.append(f"| **Estimated Market Value** | **${val.estimated_value:,.0f}** | Primary deterministic multi-component estimate |")
-            lines.append(f"| **Valuation Range** | **${val.valuation_range_low:,.0f} — ${val.valuation_range_high:,.0f}** | Conservative lower & upper bounds |")
-            lines.append(f"| **Price per Sq Ft** | **${val.valuation_psf:,.2f} / sqft** | Based on gross living area |")
+            lines.append(f"| **Estimated Market Value** | **{format_inr(val.estimated_value, use_words=True)}** | Primary deterministic multi-component estimate |")
+            lines.append(f"| **Valuation Range** | **{format_inr(val.valuation_range_low)} — {format_inr(val.valuation_range_high)}** | Empirical lower & upper boundaries |")
+            lines.append(f"| **Price per Sq Ft** | **{format_psf(val.valuation_psf)}** | Based on built-up living area |")
             lines.append(f"| **Confidence Level** | **{conf_color}** (`{val.confidence_score:.1f}/100`) | Multi-factor data reliability score |")
             lines.append("")
 
             bd = val.breakdown
-            income_val_str = f"${bd.income_capitalization_component:,.0f}" if bd.income_capitalization_component is not None else "N/A"
+            income_val_str = format_inr(bd.income_capitalization_component, use_words=True) if bd.income_capitalization_component is not None else "N/A"
             lines.append("#### Deterministic Component Weight Allocation")
-            lines.append("| Component Model | Applied Weight | Contribution Value ($) | Contribution Description |")
+            lines.append("| Component Model | Applied Weight | Contribution Value | Contribution Description |")
             lines.append("| :--- | :--- | :--- | :--- |")
-            lines.append(f"| **CMA Adjusted Sales** | {bd.cma_weight*100:.1f}% | ${bd.cma_sales_component:,.0f} | Appraisal-adjusted comparable transactions |")
-            lines.append(f"| **Submarket Trend PSF** | {bd.market_trend_weight*100:.1f}% | ${bd.market_trend_component:,.0f} | 24-month historical trend price index |")
-            lines.append(f"| **Location & Quality** | {bd.location_weight*100:.1f}% | ${bd.location_component:,.0f} | Condition, age, and amenity factor |")
-            lines.append(f"| **Income Capitalization** | {bd.income_weight*100:.1f}% | {income_val_str} | Capitalized net operating/gross yield |")
+            lines.append(f"| **CMA Adjusted Sales** | {bd.cma_weight*100:.1f}% | {format_inr(bd.cma_sales_component, use_words=True)} | Appraisal-adjusted comparable transactions |")
+            lines.append(f"| **Submarket Trend PSF** | {bd.market_trend_weight*100:.1f}% | {format_inr(bd.market_trend_component, use_words=True)} | 24-month historical trend price index |")
+            lines.append(f"| **Location & Quality** | {bd.location_weight*100:.1f}% | {format_inr(bd.location_component, use_words=True)} | Condition, age, and amenity factor |")
+            lines.append(f"| **Income Capitalization** | {bd.income_weight*100:.1f}% | {income_val_str} | Capitalized gross/net yield |")
             lines.append("")
         else:
             lines.append("*Valuation calculation is not yet executed or unavailable.*")
@@ -119,19 +128,19 @@ class ComplianceDossierReporter:
         # Dynamic Rental Pricing Block
         if pricing:
             lines.append("### Dynamic Rental Pricing Recommendation")
-            lines.append("| Pricing Tier | Monthly Rent ($) | Strategic Purpose |")
+            lines.append("| Pricing Tier | Monthly Rent | Strategic Purpose |")
             lines.append("| :--- | :--- | :--- |")
-            lines.append(f"| **Floor Rate** | **${pricing.recommended_rent_range_low:,.0f} / mo** | Defensive rate for accelerated lease-up velocity |")
-            lines.append(f"| **Recommended Midpoint** | **${pricing.recommended_midpoint:,.0f} / mo** | Optimal risk-adjusted target market rent |")
-            lines.append(f"| **Ceiling Rate** | **${pricing.recommended_rent_range_high:,.0f} / mo** | Maximum yield target during peak seasonal demand |")
+            lines.append(f"| **Floor Rate** | **{format_rent(pricing.recommended_rent_range_low)}** | Defensive rate for accelerated lease-up velocity |")
+            lines.append(f"| **Recommended Midpoint** | **{format_rent(pricing.recommended_midpoint)}** | Optimal risk-adjusted target market rent |")
+            lines.append(f"| **Ceiling Rate** | **{format_rent(pricing.recommended_rent_range_high)}** | Maximum yield target during peak demand |")
             lines.append("")
 
             if pricing.current_in_place_rent is not None:
                 gap_amt = pricing.rent_gap_amount if pricing.rent_gap_amount is not None else (pricing.recommended_midpoint - pricing.current_in_place_rent)
                 gap_pct = pricing.rent_gap_percentage if pricing.rent_gap_percentage is not None else (gap_amt / max(pricing.current_in_place_rent, 1.0) * 100.0)
                 gap_sign = "+" if gap_amt >= 0 else ""
-                lines.append(f"- **Current In-Place Rent:** `${pricing.current_in_place_rent:,.0f} / mo`")
-                lines.append(f"- **In-Place Rent Gap:** `{gap_sign}${gap_amt:,.0f} / mo` (`{gap_sign}{gap_pct:.1f}%`) relative to target market rent.")
+                lines.append(f"- **Current In-Place Rent:** `{format_rent(pricing.current_in_place_rent)}`")
+                lines.append(f"- **In-Place Rent Gap:** `{gap_sign}{format_inr(gap_amt)} / mo` (`{gap_sign}{gap_pct:.1f}%`) relative to target market rent.")
             if pricing.pricing_drivers:
                 lines.append(f"- **Primary Pricing Drivers:** {'; '.join(pricing.pricing_drivers)}")
             lines.append(f"- **Seasonal / Momentum Adjustments:** {pricing.seasonal_factors}")
@@ -149,14 +158,15 @@ class ComplianceDossierReporter:
             lines.append("| Property Attribute | Specification | Property Attribute | Specification |")
             lines.append("| :--- | :--- | :--- | :--- |")
             lines.append(f"| **Property ID** | `{profile.property_id}` | **Property Type** | `{profile.property_type.value}` |")
-            lines.append(f"| **Address** | {profile.address} | **City, State Zip** | {profile.city}, {profile.state} {profile.zip_code} |")
-            lines.append(f"| **Gross Living Area** | {profile.sqft:,.0f} sqft | **Bedrooms / Bathrooms** | {profile.bedrooms} Beds / {profile.bathrooms:.1f} Baths |")
-            lines.append(f"| **Year Built** | {profile.year_built} (Age: {profile.age_years} yrs) | **Property Condition** | `{profile.condition.value}` |")
-            lines.append(f"| **Parking Spaces** | {profile.parking_spaces} covered | **Stories / Levels** | {profile.stories} |")
+            lines.append(f"| **Address** | {profile.address} | **City, State (PIN)** | {profile.city}, {profile.state} (PIN: {profile.zip_code}) |")
+            carpet_disp = f"{profile.carpet_area_sqft:,.0f} sq ft" if profile.carpet_area_sqft else "Not specified"
+            lines.append(f"| **Super Built-up Area** | {profile.sqft:,.0f} sq ft | **RERA Carpet Area** | {carpet_disp} |")
+            lines.append(f"| **Layout / Configuration** | {profile.bhk_display} ({profile.bathrooms:.0f} Bath) | **Property Condition** | `{profile.condition.value}` |")
+            lines.append(f"| **Year Built** | {profile.year_built} (Age: {profile.age_years} yrs) | **Reserved Parking** | {profile.parking_spaces} covered space(s) |")
             occ_str = f"{profile.occupancy_rate * 100:.1f}%" if profile.occupancy_rate is not None else "N/A"
-            lines.append(f"| **HOA Monthly Dues** | ${profile.hoa_monthly:,.0f} / mo | **Current Occupancy** | {occ_str} |")
+            lines.append(f"| **Monthly Maintenance** | {format_rent(profile.hoa_monthly)} | **Current Occupancy** | {occ_str} |")
             amenities_str = ", ".join(profile.amenities) if profile.amenities else "None reported"
-            lines.append(f"| **Amenities** | {amenities_str} | **Data Origin** | `{profile.data_origin.value}` |")
+            lines.append(f"| **Key Amenities** | {amenities_str} | **Data Origin** | `{profile.data_origin.value}` |")
             lines.append("")
         else:
             lines.append("*Property profile not provided.*")
@@ -175,7 +185,7 @@ class ComplianceDossierReporter:
 
         subj_source = profile.provenance.source if profile and profile.provenance else "Intake User Interface"
         subj_origin = profile.data_origin.value if profile else "USER-PROVIDED"
-        lines.append(f"| **Subject Asset** | {subj_source} | `{subj_origin}` | 1 record | Subject property specifications provided for analysis |")
+        lines.append(f"| **Subject Asset** | {subj_source} | `{subj_origin}` | 1 record | User-provided property specifications |")
 
         sales_records: List[MarketRecord] = state.get("sales_records", [])
         sales_source = sales_records[0].provenance.source if sales_records and sales_records[0].provenance else "Synthetic Demonstration Provider v1.0"
@@ -192,59 +202,60 @@ class ComplianceDossierReporter:
         lines.append("")
 
         # ---------------------------------------------------------------------
-        # 6. Comparative Market Analysis (CMA) & Appraisal Adjustments
+        # 6. Comparative Market Analysis (CMA) & Feature Adjustments
         # ---------------------------------------------------------------------
         lines.append("## 4. Comparative Market Analysis (CMA) & Feature Adjustments")
         lines.append("")
         if cma and comps:
             lines.append(f"**CMA Selection Summary:** Evaluated against candidate comps within a search radius of "
-                         f"`{state.get('search_radius_miles', 1.5):.1f} miles`. Top {len(comps)} comps selected by multi-attribute similarity.")
+                         f"`{state.get('search_radius_miles', 1.5):.1f} miles ({state.get('search_radius_miles', 1.5)*1.60934:.1f} km)`. "
+                         f"Top {len(comps)} comps selected by multi-attribute similarity.")
             lines.append("")
-            lines.append(f"- **Median Comparable Adjusted Value:** `${cma.adjusted_median_price:,.0f}`")
-            lines.append(f"- **Mean Comparable Adjusted Value:** `${cma.adjusted_mean_price:,.0f}`")
-            lines.append(f"- **CMA Price Spread:** `${cma.adjusted_price_low:,.0f} — ${cma.adjusted_price_high:,.0f}` (Outliers Identified: {cma.outlier_count})")
+            lines.append(f"- **Median Comparable Adjusted Value:** `{format_inr(cma.adjusted_median_price, use_words=True)}`")
+            lines.append(f"- **Mean Comparable Adjusted Value:** `{format_inr(cma.adjusted_mean_price, use_words=True)}`")
+            lines.append(f"- **CMA Price Spread:** `{format_inr_short(cma.adjusted_price_low)} — {format_inr_short(cma.adjusted_price_high)}` (Outliers Identified: {cma.outlier_count})")
             lines.append("")
 
             lines.append("### Selected Comparable Properties")
-            lines.append("| Address | Dist (mi) | Sim Score | Sale Date | Sale Price | Net Adjustments | Adjusted Price | Outlier Status |")
+            lines.append("| Address | Distance | Sim Score | Sale Date | Sale Price | Net Adjustments | Adjusted Price | Outlier Status |")
             lines.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
             for c in comps:
                 outlier_badge = "⚠️ Outlier" if c.is_outlier else "✅ Normal"
                 net_sign = "+" if c.total_net_adjustment >= 0 else ""
-                sale_price_str = f"${c.record.sale_price:,.0f}" if c.record.sale_price else "N/A"
+                sale_price_str = format_inr(c.record.sale_price) if c.record.sale_price else "N/A"
                 sale_date_str = c.record.transaction_date or "Recent"
                 lines.append(
-                    f"| {c.record.address} | {c.record.distance_miles:.2f} mi | `{c.similarity_score:.3f}` | "
-                    f"{sale_date_str} | {sale_price_str} | {net_sign}${c.total_net_adjustment:,.0f} | "
-                    f"**${c.adjusted_price:,.0f}** | {outlier_badge} |"
+                    f"| {c.record.address} | {c.record.distance_km:.2f} km | `{c.similarity_score:.3f}` | "
+                    f"{sale_date_str} | {sale_price_str} | {net_sign}₹{c.total_net_adjustment:,.0f} | "
+                    f"**{format_inr(c.adjusted_price)}** | {outlier_badge} |"
                 )
             lines.append("")
 
             lines.append("### Step-by-Step Appraisal Feature Adjustments Breakdown")
             lines.append("> **Appraisal Directionality Rule:** Standard appraisal methodology is strictly enforced: ")
-            lines.append("> *the comparable property is adjusted to match the subject property* ($AdjustedPrice = CompSalePrice + \\sum Adjustments$).")
+            lines.append("> *the comparable property is adjusted to match the subject property* (\\(AdjustedPrice = CompSalePrice + \\sum Adjustments\\)).")
             lines.append("")
 
-            lines.append("| Comparable Address | Size Adj | Beds Adj | Baths Adj | Age Adj | Condition Adj | Amenities Adj | Time Adj | Total Net ($) |")
+            lines.append("| Comparable Address | Size Adj | Beds Adj | Baths Adj | Age Adj | Condition Adj | Amenities Adj | Parking Adj | Total Net (₹) |")
             lines.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
             for c in comps:
                 adj_map = {adj.feature_name.lower(): adj.adjustment_amount for adj in c.adjustments}
                 def _fmt(val: float) -> str:
                     if abs(val) < 1.0:
-                        return "$0"
-                    return f"{'+' if val > 0 else ''}${val:,.0f}"
+                        return "₹0"
+                    return f"{'+' if val > 0 else ''}₹{val:,.0f}"
 
-                size_adj = _fmt(adj_map.get("gross living area (sqft)", 0.0))
-                bed_adj = _fmt(adj_map.get("bedroom count", 0.0))
-                bath_adj = _fmt(adj_map.get("bathroom count", 0.0))
-                age_adj = _fmt(adj_map.get("property age", 0.0))
+                size_adj = _fmt(adj_map.get("square footage", 0.0))
+                bed_adj = _fmt(adj_map.get("bedrooms", 0.0))
+                bath_adj = _fmt(adj_map.get("bathrooms", 0.0))
+                age_adj = _fmt(adj_map.get("year built / effective age", 0.0))
                 cond_adj = _fmt(adj_map.get("property condition", 0.0))
-                amen_adj = _fmt(adj_map.get("amenities", 0.0))
-                time_adj = _fmt(adj_map.get("market appreciation / timing", 0.0))
+                amen_adj = _fmt(adj_map.get("amenities differential", 0.0))
+                park_adj = _fmt(adj_map.get("parking spaces", 0.0))
                 total_net = _fmt(c.total_net_adjustment)
 
                 lines.append(
-                    f"| {c.record.address} | {size_adj} | {bed_adj} | {bath_adj} | {age_adj} | {cond_adj} | {amen_adj} | {time_adj} | **{total_net}** |"
+                    f"| {c.record.address} | {size_adj} | {bed_adj} | {bath_adj} | {age_adj} | {cond_adj} | {amen_adj} | {park_adj} | **{total_net}** |"
                 )
             lines.append("")
         else:
@@ -290,10 +301,10 @@ class ComplianceDossierReporter:
             lines.append("| :--- | :--- | :--- |")
             lines.append(f"| **Physical Occupancy** | **{rent_summary.physical_occupancy_rate*100:.1f}%** ({rent_summary.occupied_units}/{rent_summary.total_units} units) | In-place occupied percentage |")
             lines.append(f"| **Physical Vacancy** | **{rent_summary.physical_vacancy_rate*100:.1f}%** | Immediate leasing exposure |")
-            lines.append(f"| **Gross Potential Monthly Rent** | **${rent_summary.gross_potential_monthly_rent:,.0f} / mo** | 100% capacity rental yield |")
-            lines.append(f"| **In-Place Monthly Rent** | **${rent_summary.current_in_place_monthly_rent:,.0f} / mo** | Current operating cash flow |")
-            lines.append(f"| **Average Rent per Unit** | **${rent_summary.avg_rent_per_unit:,.0f} / mo** | Weighted average unit revenue |")
-            lines.append(f"| **Average Rent per Sq Ft** | **${rent_summary.avg_rent_psf:,.2f} / sqft** | Normalized unit rate |")
+            lines.append(f"| **Gross Potential Monthly Rent** | **{format_rent(rent_summary.gross_potential_monthly_rent)}** | 100% capacity rental yield |")
+            lines.append(f"| **In-Place Monthly Rent** | **{format_rent(rent_summary.current_in_place_monthly_rent)}** | Current operating cash flow |")
+            lines.append(f"| **Average Rent per Unit** | **{format_rent(rent_summary.avg_rent_per_unit)}** | Weighted average unit revenue |")
+            lines.append(f"| **Average Rent per Sq Ft** | **{format_psf(rent_summary.avg_rent_psf)}** | Normalized unit rate |")
             lines.append(f"| **Cumulative Lease Turnover Risk** | **{rent_summary.lease_turnover_exposure_pct:.1f}%** | 90-day combined rollover exposure |")
             lines.append("")
 
@@ -312,10 +323,10 @@ class ComplianceDossierReporter:
                 lines.append("> **PRIVACY SAFEGUARD:** Tenant identities are pseudonymized tokens (`TENANT-xxx`). ")
                 lines.append("> No personally identifiable tenant information (PII) is stored or exported.")
                 lines.append("")
-                lines.append("| Unit ID | Anonymized Tenant Token | Layout | Sq Ft | In-Place Rent | In-Place PSF | Lease End | Status |")
+                lines.append("| Unit ID | Anonymized Tenant Token | Layout | Area | In-Place Rent | In-Place PSF | Lease End | Status |")
                 lines.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
                 for u in rent_units:
-                    lines.append(f"| `{u.unit_id}` | `{u.tenant_pseudonym}` | {u.bedrooms}B/{u.bathrooms:.0f}Ba | {u.sqft:,.0f} | ${u.current_rent:,.0f} | ${u.in_place_psf:.2f} | {u.lease_end} | `{u.lease_status.value}` |")
+                    lines.append(f"| `{u.unit_id}` | `{u.tenant_pseudonym}` | {u.bhk_display}/{u.bathrooms:.0f}Bath | {u.sqft:,.0f} sq ft | {format_rent(u.current_rent)} | {format_psf(u.in_place_psf)} | {u.lease_end} | `{u.lease_status.value}` |")
                 lines.append("")
         else:
             lines.append("*Rent roll operational summary is unavailable.*")
@@ -374,8 +385,8 @@ class ComplianceDossierReporter:
             lines.append(f"| **Reviewer Name & Role** | {review.reviewer_name} ({review.reviewer_role}) |")
             lines.append(f"| **Review Timestamp** | `{review.decision_timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')}` |")
             lines.append(f"| **Reviewer Justification Notes** | *\"{review.reviewer_notes}\"* |")
-            val_override = f"${review.modified_valuation:,.0f}" if review.modified_valuation else "None (Accepted AI Valuation)"
-            rent_override = f"${review.modified_recommended_rent:,.0f} / mo" if review.modified_recommended_rent else "None (Accepted AI Rent)"
+            val_override = format_inr(review.modified_valuation, use_words=True) if review.modified_valuation else "None (Accepted AI Valuation)"
+            rent_override = format_rent(review.modified_recommended_rent) if review.modified_recommended_rent else "None (Accepted AI Rent)"
             lines.append(f"| **Valuation Override Applied** | {val_override} |")
             lines.append(f"| **Rental Pricing Override Applied** | {rent_override} |")
             lines.append("")
@@ -434,7 +445,7 @@ class ComplianceDossierReporter:
         lines.append(f"- **Legal Notice:** {LEGAL_DISCLAIMER_TEXT}")
         lines.append(f"- **Data Provenance:** {SYNTHETIC_NOTICE_TEXT}")
         lines.append("- **Export Classification:** Institutional Decision-Support Compliance Dossier")
-        lines.append(f"- **System Identity:** Automated Valuation & Dynamic Pricing Agent Platform v{self.platform_version}")
+        lines.append(f"- **System Identity:** Automated Valuation & Dynamic Pricing Agent Platform (India) v{self.platform_version}")
         lines.append("")
 
         return "\n".join(lines)
@@ -502,6 +513,9 @@ class ComplianceDossierReporter:
                 "report_id": report_id,
                 "generated_at": now_utc,
                 "platform_version": self.platform_version,
+                "currency": CURRENCY_CODE,
+                "currency_symbol": CURRENCY_SYMBOL,
+                "locale": "en_IN",
                 "system_classification": "Decision-Support System (Non-Autonomous Appraiser)",
                 "disclaimers": {
                     "legal_disclaimer": LEGAL_DISCLAIMER_TEXT,

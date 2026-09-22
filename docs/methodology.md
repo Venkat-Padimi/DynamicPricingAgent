@@ -48,30 +48,33 @@ If the subject is superior to the comparable in a given attribute, the comparabl
 
 ### Line-Item Adjustment Formulas
 
-#### 1. Gross Living Area (GLA) Adjustment
+#### 1. Super Built-up / Carpet Area Adjustment
 $$\text{Adj}_{\text{sqft}} = (A_{\text{subj}} - A_{\text{comp}}) \times R_{\text{sqft}}$$
-- $A_{\text{subj}}, A_{\text{comp}}$: Gross living area in square feet.
-- $R_{\text{sqft}}$: Marginal sqft adjustment rate ($120.00 / sqft default).
+- $A_{\text{subj}}, A_{\text{comp}}$: Area in square feet.
+- $R_{\text{sqft}}$: Marginal sqft adjustment rate ($\text{₹}2,500.00 / \text{sq ft}$ standard Indian urban baseline).
 
-#### 2. Bedroom Count Adjustment
-$$\text{Adj}_{\text{bed}} = (B_{\text{subj}} - B_{\text{comp}}) \times \$15,000$$
+#### 2. Bedroom / BHK Count Adjustment
+$$\text{Adj}_{\text{bed}} = (B_{\text{subj}} - B_{\text{comp}}) \times \text{₹}5,00,000$$
 
 #### 3. Bathroom Count Adjustment
-$$\text{Adj}_{\text{bath}} = (Ba_{\text{subj}} - Ba_{\text{comp}}) \times \$10,000$$
+$$\text{Adj}_{\text{bath}} = (Ba_{\text{subj}} - Ba_{\text{comp}}) \times \text{₹}2,00,000$$
 
 #### 4. Property Age Adjustment
-$$\text{Adj}_{\text{age}} = (\text{Age}_{\text{comp}} - \text{Age}_{\text{subj}}) \times \$1,000$$
+$$\text{Adj}_{\text{age}} = (\text{Age}_{\text{comp}} - \text{Age}_{\text{subj}}) \times \text{₹}35,000$$
 *(Note: If the subject is younger than the comparable, $\text{Age}_{\text{comp}} - \text{Age}_{\text{subj}} > 0$, yielding a positive adjustment to the comp).*
 
 #### 5. Property Condition Adjustment
-$$\text{Adj}_{\text{cond}} = (C_{\text{subj}} - C_{\text{comp}}) \times \$12,500$$
-- $C$: Condition rating mapped to ordinal values $1$ to $5$.
+$$\text{Adj}_{\text{cond}} = (C_{\text{subj}} - C_{\text{comp}}) \times \text{₹}2,50,000$$
+- $C$: Condition rating mapped to ordinal values $1$ to $5$ (Poor, Fair, Good, Excellent, Luxury/Renovated).
 
-#### 6. Amenities Difference Adjustment
-$$\text{Adj}_{\text{amen}} = (|M_{\text{subj}}| - |M_{\text{comp}}|) \times \$5,000$$
-- Net count difference between subject and comparable premium amenities.
+#### 6. Reserved Parking Space Adjustment
+$$\text{Adj}_{\text{park}} = (\text{Park}_{\text{subj}} - \text{Park}_{\text{comp}}) \times \text{₹}2,00,000$$
 
-#### 7. Time / Market Appreciation Adjustment
+#### 7. Amenities Difference Adjustment
+$$\text{Adj}_{\text{amen}} = (|M_{\text{subj}}| - |M_{\text{comp}}|) \times \text{₹}1,50,000$$
+- Net count difference between subject and comparable premium amenities (Clubhouse, Swimming Pool, Power Backup, Gym).
+
+#### 8. Time / Market Appreciation Adjustment
 $$\text{Adj}_{\text{time}} = \text{SalePrice}_{\text{comp}} \times \left( \frac{\text{DaysSinceSale}}{365.25} \times g_{\text{annual}} \right)$$
 - $\text{DaysSinceSale}$: Days elapsed between comp closed sale date and evaluation date.
 - $g_{\text{annual}}$: Annual sales price growth rate from submarket trend data.

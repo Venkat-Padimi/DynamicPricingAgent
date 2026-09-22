@@ -5,6 +5,7 @@ from typing import List, Optional
 import numpy as np
 import plotly.graph_objects as go
 
+from src.core.formatters import format_inr
 from src.core.models import ComparableProperty, MarketConditions, RentRollSummary
 
 CHART_THEME = {
@@ -40,13 +41,13 @@ def plot_comps_scatter(
     valid_comps = [c for c in comparables if not c.is_outlier]
     if valid_comps:
         x_vals = [c.record.sqft for c in valid_comps]
-        y_vals = [c.record.sale_price or (c.record.monthly_rent * 180 if c.record.monthly_rent else 0) for c in valid_comps]
+        y_vals = [c.record.sale_price or (c.record.monthly_rent * 240 if c.record.monthly_rent else 0) for c in valid_comps]
         hover_texts = [
             f"<b>{c.record.address}</b><br>"
-            f"Distance: {c.record.distance_miles:.2f} mi<br>"
+            f"Distance: {c.record.distance_km:.2f} km ({c.record.distance_miles:.2f} mi)<br>"
             f"Similarity: {c.similarity_score * 100:.1f}%<br>"
-            f"Sale Price: ${c.record.sale_price or 0:,.0f}<br>"
-            f"Adjusted Price: ${c.adjusted_price:,.0f}<br>"
+            f"Sale Price: {format_inr(c.record.sale_price or 0)}<br>"
+            f"Adjusted Price: {format_inr(c.adjusted_price)}<br>"
             f"Source: {c.record.data_origin.value}"
             for c in valid_comps
         ]
@@ -80,7 +81,7 @@ def plot_comps_scatter(
                 y=[c.record.sale_price or 0 for c in outliers],
                 mode="markers",
                 marker=dict(size=14, color="#ef4444", symbol="x", line=dict(width=2, color="#fca5a5")),
-                hovertext=[f"<b>OUTLIER: {c.record.address}</b><br>Sale Price: ${c.record.sale_price or 0:,.0f}" for c in outliers],
+                hovertext=[f"<b>OUTLIER: {c.record.address}</b><br>Sale Price: {format_inr(c.record.sale_price or 0)}" for c in outliers],
                 hoverinfo="text",
                 name="Statistical Outliers",
             )
@@ -96,16 +97,16 @@ def plot_comps_scatter(
                 marker=dict(size=18, color="#f59e0b", symbol="star", line=dict(width=2, color="#fbbf24")),
                 text=["Subject"],
                 textposition="bottom center",
-                hovertext=f"<b>SUBJECT PROPERTY</b><br>Area: {subject_sqft:,.0f} sqft<br>Estimated Value: ${subject_estimated_val:,.0f}",
+                hovertext=f"<b>SUBJECT PROPERTY</b><br>Area: {subject_sqft:,.0f} sq ft<br>Estimated Value: {format_inr(subject_estimated_val)}",
                 hoverinfo="text",
                 name="Subject Property",
             )
         )
 
     fig.update_layout(
-        title="<b>Comparable Sales Price vs Living Area (Sq Ft)</b>",
-        xaxis=dict(title="Living Area (Sq Ft)", gridcolor=CHART_THEME["gridcolor"]),
-        yaxis=dict(title="Price ($)", tickprefix="$", tickformat=",.0f", gridcolor=CHART_THEME["gridcolor"]),
+        title="<b>Comparable Sales Price vs Built-up Area (Sq Ft)</b>",
+        xaxis=dict(title="Built-up Area (Sq Ft)", gridcolor=CHART_THEME["gridcolor"]),
+        yaxis=dict(title="Price (₹)", tickprefix="₹", tickformat=",.0f", gridcolor=CHART_THEME["gridcolor"]),
         paper_bgcolor=CHART_THEME["paper_bgcolor"],
         plot_bgcolor=CHART_THEME["plot_bgcolor"],
         font=CHART_THEME["font"],
@@ -123,19 +124,19 @@ def plot_cma_waterfall(comp: ComparableProperty) -> go.Figure:
     measure = ["absolute"]
     x = ["Base Sale Price"]
     y = [base_price]
-    text = [f"${base_price:,.0f}"]
+    text = [f"₹{base_price:,.0f}"]
 
     for adj in comp.adjustments:
         if abs(adj.adjustment_amount) > 0:
             measure.append("relative")
             x.append(adj.feature_name)
             y.append(adj.adjustment_amount)
-            text.append(f"{adj.adjustment_amount:+,.0f}")
+            text.append(f"₹{adj.adjustment_amount:+,.0f}")
 
     measure.append("total")
     x.append("Adjusted Price")
     y.append(comp.adjusted_price)
-    text.append(f"${comp.adjusted_price:,.0f}")
+    text.append(f"₹{comp.adjusted_price:,.0f}")
 
     fig.add_trace(
         go.Waterfall(
@@ -155,7 +156,7 @@ def plot_cma_waterfall(comp: ComparableProperty) -> go.Figure:
 
     fig.update_layout(
         title=f"<b>Feature Adjustments: {comp.record.address}</b>",
-        yaxis=dict(title="Dollar Impact ($)", tickprefix="$", tickformat=",.0f", gridcolor=CHART_THEME["gridcolor"]),
+        yaxis=dict(title="Adjustment Impact (₹)", tickprefix="₹", tickformat=",.0f", gridcolor=CHART_THEME["gridcolor"]),
         paper_bgcolor=CHART_THEME["paper_bgcolor"],
         plot_bgcolor=CHART_THEME["plot_bgcolor"],
         font=CHART_THEME["font"],
@@ -190,7 +191,7 @@ def plot_historical_psf_trend(market_conditions: Optional[MarketConditions]) -> 
         go.Scatter(
             x=periods,
             y=sale_psf,
-            name="Sales PSF ($)",
+            name="Sales PSF (₹)",
             mode="lines+markers",
             line=dict(color="#38bdf8", width=2.5),
             marker=dict(size=6),
@@ -202,7 +203,7 @@ def plot_historical_psf_trend(market_conditions: Optional[MarketConditions]) -> 
         go.Scatter(
             x=periods,
             y=rent_psf,
-            name="Rental PSF ($/mo)",
+            name="Rental PSF (₹/mo)",
             mode="lines+markers",
             line=dict(color="#34d399", width=2.5, dash="dash"),
             marker=dict(size=6),
@@ -211,17 +212,17 @@ def plot_historical_psf_trend(market_conditions: Optional[MarketConditions]) -> 
     )
 
     fig.update_layout(
-        title=f"<b>Historical Price & Rent Trends: {market_conditions.submarket_name}</b>",
+        title=f"<b>Historical Capital & Rental Trends: {market_conditions.submarket_name}</b>",
         xaxis=dict(title="Period (YYYY-MM)", gridcolor=CHART_THEME["gridcolor"]),
         yaxis=dict(
-            title=dict(text="Sales PSF ($)", font=dict(color="#38bdf8")),
-            tickprefix="$",
+            title=dict(text="Sales PSF (₹/sq ft)", font=dict(color="#38bdf8")),
+            tickprefix="₹",
             gridcolor=CHART_THEME["gridcolor"],
             tickfont=dict(color="#38bdf8"),
         ),
         yaxis2=dict(
-            title=dict(text="Rental PSF ($)", font=dict(color="#34d399")),
-            tickprefix="$",
+            title=dict(text="Rental PSF (₹/sq ft/mo)", font=dict(color="#34d399")),
+            tickprefix="₹",
             overlaying="y",
             side="right",
             gridcolor="#1e293b",

@@ -227,7 +227,7 @@ class SyntheticRentRollProvider(BaseRentRollProvider):
         # Estimate market/potential rent for vacant units using occupied average PSF
         occupied_sqft = sum(u.sqft for u in units if u.lease_status == LeaseStatus.OCCUPIED)
         occupied_rent = sum(u.current_rent for u in units if u.lease_status == LeaseStatus.OCCUPIED)
-        avg_occ_psf = (occupied_rent / occupied_sqft) if occupied_sqft > 0 else 2.50
+        avg_occ_psf = (occupied_rent / occupied_sqft) if occupied_sqft > 0 else 25.0
 
         gross_potential = 0.0
         for u in units:

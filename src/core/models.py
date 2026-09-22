@@ -16,10 +16,11 @@ from src.core.enums import (
 )
 
 LEGAL_DISCLAIMER_TEXT = (
-    "This valuation and pricing estimate is an AI-assisted decision-support output and is "
-    "NOT a legally binding appraisal, licensed real estate valuation, or legal advice. "
-    "Human review, on-site physical inspection, and verification against official county records "
-    "are strictly required before any commercial, financial, or legal commitment."
+    "Decision-Support Notice: This AI-assisted valuation is intended for research and decision-support "
+    "purposes only. It is NOT a legally binding appraisal, registered valuation, or professional "
+    "assessment under Indian law. Human review, verification against authoritative property records "
+    "(Sub-Registrar / Municipal records), and appropriate professional assessment are required before "
+    "financial, legal, lending, or investment decisions."
 )
 
 SYNTHETIC_NOTICE_TEXT = "Synthetic demonstration data — not real market data."
@@ -47,9 +48,11 @@ class PropertyProfile(BaseModel):
     address: str
     city: str
     state: str
-    zip_code: str
-    property_type: PropertyType = Field(default=PropertyType.SINGLE_FAMILY)
-    sqft: float = Field(..., gt=0, description="Gross living area in square feet")
+    zip_code: str = Field(..., description="PIN Code / Postal code")
+    locality: Optional[str] = Field(default=None, description="Neighborhood / Locality / Sector")
+    property_type: PropertyType = Field(default=PropertyType.APARTMENT)
+    sqft: float = Field(..., gt=0, description="Gross built-up or super built-up area in square feet")
+    carpet_area_sqft: Optional[float] = Field(default=None, ge=0, description="RERA carpet area in sq ft")
     bedrooms: int = Field(..., ge=0)
     bathrooms: float = Field(..., ge=0)
     year_built: int = Field(..., ge=1800, le=2030)
@@ -58,8 +61,8 @@ class PropertyProfile(BaseModel):
     amenities: List[str] = Field(default_factory=list)
     parking_spaces: int = Field(default=1, ge=0)
     stories: int = Field(default=1, ge=1)
-    hoa_monthly: float = Field(default=0.0, ge=0)
-    current_rent: Optional[float] = Field(default=None, ge=0, description="Current in-place rent if leased")
+    hoa_monthly: float = Field(default=0.0, ge=0, description="Monthly maintenance / society charges in INR")
+    current_rent: Optional[float] = Field(default=None, ge=0, description="Current in-place rent if leased in INR")
     occupancy_rate: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     data_origin: DataOrigin = Field(default=DataOrigin.USER_PROVIDED_DATA)
     provenance: ProvenanceMetadata = Field(
@@ -69,6 +72,16 @@ class PropertyProfile(BaseModel):
             notice="User-provided property specifications.",
         )
     )
+
+    @property
+    def pin_code(self) -> str:
+        return self.zip_code
+
+    @property
+    def bhk_display(self) -> str:
+        if self.bedrooms == 0:
+            return "Studio / 1 RK"
+        return f"{self.bedrooms} BHK"
 
     @property
     def age_years(self) -> int:
@@ -81,12 +94,14 @@ class MarketRecord(BaseModel):
     address: str
     city: str
     state: str
-    zip_code: str
+    zip_code: str = Field(..., description="PIN Code / Postal code")
+    locality: Optional[str] = Field(default=None, description="Neighborhood / Locality / Sector")
     property_type: PropertyType
     transaction_date: str = Field(..., description="ISO date YYYY-MM-DD")
-    sale_price: Optional[float] = Field(default=None, ge=0, description="Sale price if closed sale")
-    monthly_rent: Optional[float] = Field(default=None, ge=0, description="Monthly rent if lease transaction")
+    sale_price: Optional[float] = Field(default=None, ge=0, description="Sale price if closed sale in INR")
+    monthly_rent: Optional[float] = Field(default=None, ge=0, description="Monthly rent if lease transaction in INR")
     sqft: float = Field(..., gt=0)
+    carpet_area_sqft: Optional[float] = Field(default=None, ge=0)
     bedrooms: int = Field(..., ge=0)
     bathrooms: float = Field(..., ge=0)
     year_built: int
@@ -97,6 +112,20 @@ class MarketRecord(BaseModel):
     parking_spaces: int = Field(default=1, ge=0)
     data_origin: DataOrigin = Field(default=DataOrigin.SYNTHETIC_DEMONSTRATION_DATA)
     provenance: ProvenanceMetadata
+
+    @property
+    def pin_code(self) -> str:
+        return self.zip_code
+
+    @property
+    def distance_km(self) -> float:
+        return round(self.distance_miles * 1.60934, 2)
+
+    @property
+    def bhk_display(self) -> str:
+        if self.bedrooms == 0:
+            return "Studio / 1 RK"
+        return f"{self.bedrooms} BHK"
 
     @property
     def price_per_sqft(self) -> float:
@@ -147,6 +176,8 @@ class CMAAnalysis(BaseModel):
     adjusted_psf_mean: float = Field(default=0.0)
     outlier_count: int = Field(default=0)
     methodology_notes: str = Field(default="")
+    currency: str = Field(default="INR")
+    currency_symbol: str = Field(default="₹")
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -200,6 +231,12 @@ class RentRollUnit(BaseModel):
         description="Anonymized hash or token (e.g. 'TENANT-89F1') - strictly NO real PII",
     )
 
+    @property
+    def bhk_display(self) -> str:
+        if self.bedrooms == 0:
+            return "Studio / 1 RK"
+        return f"{self.bedrooms} BHK"
+
 
 class RentRollSummary(BaseModel):
     """Operational summary of property leases and occupancy."""
@@ -224,6 +261,8 @@ class RentRollSummary(BaseModel):
     lease_turnover_exposure_pct: float
     cliff_risk_level: str = Field(default="LOW")
     potential_rent_gap: float = Field(default=0.0, description="Gross potential rent minus in-place rent")
+    currency: str = Field(default="INR")
+    currency_symbol: str = Field(default="₹")
     data_origin: DataOrigin = Field(default=DataOrigin.SYNTHETIC_DEMONSTRATION_DATA)
     provenance: Optional[ProvenanceMetadata] = Field(default=None)
 
@@ -251,6 +290,8 @@ class ValuationResult(BaseModel):
     valuation_range_low: float = Field(..., gt=0)
     valuation_range_high: float = Field(..., gt=0)
     valuation_psf: float = Field(..., gt=0)
+    currency: str = Field(default="INR")
+    currency_symbol: str = Field(default="₹")
     confidence_level: ConfidenceLevel
     confidence_score: float = Field(..., ge=0.0, le=100.0)
     breakdown: ValuationComponentBreakdown
@@ -280,6 +321,8 @@ class RentalPricingResult(BaseModel):
     recommended_midpoint: float = Field(..., gt=0)
     rent_gap_amount: Optional[float] = None
     rent_gap_percentage: Optional[float] = None
+    currency: str = Field(default="INR")
+    currency_symbol: str = Field(default="₹")
     confidence_level: ConfidenceLevel
     confidence_score: float = Field(..., ge=0.0, le=100.0)
     breakdown: RentalPricingBreakdown
@@ -322,6 +365,8 @@ class HumanReviewDecision(BaseModel):
     original_recommended_rent: float
     modified_valuation: Optional[float] = None
     modified_recommended_rent: Optional[float] = None
+    currency: str = Field(default="INR")
+    currency_symbol: str = Field(default="₹")
     reviewer_notes: str = Field(default="")
     evidence_request_details: Optional[str] = None
     decision_timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

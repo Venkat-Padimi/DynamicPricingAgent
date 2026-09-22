@@ -51,7 +51,7 @@ class LeaseAnalysisEngine:
 
         # Average occupied PSF for potential rent baseline
         occupied_sqft = sum(u.sqft for u in units if u.lease_status != LeaseStatus.VACANT)
-        avg_occ_psf = (in_place_monthly / occupied_sqft) if occupied_sqft > 0 else 2.50
+        avg_occ_psf = (in_place_monthly / occupied_sqft) if occupied_sqft > 0 else 25.0
 
         # Gross potential rent
         gross_potential = 0.0
@@ -126,10 +126,10 @@ class LeaseAnalysisEngine:
         """Generate separate factual summary and agent operational interpretation."""
         facts = (
             f"Property operates at {summary.physical_occupancy_rate * 100:.1f}% physical occupancy "
-            f"({summary.occupied_units}/{summary.total_units} units) with ${summary.current_in_place_monthly_rent:,.2f} "
+            f"({summary.occupied_units}/{summary.total_units} units) with ₹{summary.current_in_place_monthly_rent:,.2f} "
             f"in-place monthly rent. Economic occupancy is {summary.economic_occupancy_rate * 100:.1f}%. "
             f"{summary.expiring_within_30_days + summary.expiring_within_60_days + summary.expiring_within_90_days} "
-            f"unit(s) face lease expiration within 90 days, representing ${summary.expiring_rent_within_90_days:,.2f} "
+            f"unit(s) face lease expiration within 90 days, representing ₹{summary.expiring_rent_within_90_days:,.2f} "
             f"in monthly rent exposure ({summary.lease_turnover_exposure_pct:.1f}% of units)."
         )
 

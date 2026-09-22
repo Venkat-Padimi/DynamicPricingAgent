@@ -1,16 +1,17 @@
-# System Architecture: Automated Valuation & Dynamic Pricing Agent
+# System Architecture: Automated Valuation & Dynamic Pricing Agent (India-First Platform)
 
 ## 1. Executive System Overview
 
-The **Automated Valuation & Dynamic Pricing Agent** is an institutional-grade, multi-agent AI decision-support platform designed to assist real estate asset managers, appraisers, and investment committees in estimating property market valuations and formulating dynamic rental pricing strategies.
+The **Automated Valuation & Dynamic Pricing Agent** is an institutional-grade, multi-agent AI decision-support platform engineered specifically for the Indian commercial and residential real estate market. It assists real estate asset managers, appraisers, developers, and investment committees in estimating property market valuations and formulating dynamic rental pricing strategies across major Indian metropolitan growth corridors (Hyderabad, Bengaluru, Mumbai MMR, Pune, Visakhapatnam, Delhi NCR, and Chennai).
 
 ### Critical Operational & Architectural Principles
-1. **Decision-Support Classification:** The system is strictly a decision-support tool. It does **NOT** make or finalize legally consequential or binding real estate appraisals autonomously.
+1. **Decision-Support Classification:** The system is strictly an automated decision-support platform, NOT a registered valuation under the Companies Act or a certified appraisal under Indian law. It does **NOT** make or finalize legally consequential decisions autonomously.
 2. **Mandatory Human-in-the-Loop (HITL) Review Gate:** Every valuation and pricing recommendation requires explicit review, attestation, and signature by a qualified human professional before finalization.
 3. **Deterministic Core Calculation Boundaries:** All financial calculations, valuation formulas, rental pricing bands, CMA feature adjustments, confidence scores, and risk evaluations are computed **100% deterministically** in Python outside the LLM. The LLM is never permitted to fabricate, estimate, or hallucinate financial numbers.
 4. **Data Provenance & Non-Fabrication Guarantee:** Every record carries an explicit provenance tag (`SYNTHETIC DEMONSTRATION DATA`, `VERIFIED MARKET DATA`, or `USER-PROVIDED PROPERTY DATA`). Demonstration fixtures carry the mandatory notice: `"Synthetic demonstration data — not real market data."`
 5. **Strict Tenant PII Safeguards:** Operational rent rolls are scrubbed of all Personally Identifiable Information (PII). Tenant identities are converted to pseudonymized cryptographic tokens (`TENANT-XXXX`).
-6. **Immutable Multi-Agent Audit Trail:** Every agent action, input summary, output summary, execution latency, and warning is logged into an immutable audit trace.
+6. **India-First Data & Formatting Standards:** All valuations and rental amounts operate in Indian Rupees (INR ₹) formatted using the Indian numbering standard (`Crore`, `Lakh`, `₹/month`, `₹/sq ft`), RERA carpet area, BHK layout configuration, and 6-digit postal PIN code indexing.
+7. **Immutable Multi-Agent Audit Trail:** Every agent action, input summary, output summary, execution latency, and warning is logged into an immutable audit trace.
 
 ---
 

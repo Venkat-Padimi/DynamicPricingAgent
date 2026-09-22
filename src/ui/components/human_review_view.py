@@ -5,6 +5,7 @@ from typing import Callable, Optional
 import streamlit as st
 
 from src.core.enums import ReviewStatus
+from src.core.formatters import format_inr, format_psf, format_rent
 from src.core.human_review_engine import HumanReviewEngine
 from src.core.models import (
     HumanReviewDecision,
@@ -18,7 +19,7 @@ def render_human_review_view(
     state: AgentWorkflowState,
     on_submit_decision: Callable[[HumanReviewDecision], None],
 ) -> None:
-    """Render mandatory Human Review controls: Approve, Modify, Reject, and Request Evidence."""
+    """Render mandatory Human Review controls: Approve, Modify, Reject, and Request Evidence in INR."""
     st.markdown("### 🧑‍⚖️ Human-in-the-Loop Review Console")
 
     val: Optional[ValuationResult] = state.get("valuation")
@@ -56,18 +57,18 @@ def render_human_review_view(
             st.markdown(f"**Timestamp:** `{review.decision_timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')}`")
 
         with c2:
-            st.markdown(f"**Original Valuation:** `${review.original_valuation:,.0f}`")
+            st.markdown(f"**Original Valuation:** `{format_inr(review.original_valuation, use_words=True)}`")
             if review.modified_valuation:
-                st.markdown(f"**Final Overridden Valuation:** `${review.modified_valuation:,.0f}`")
+                st.markdown(f"**Final Overridden Valuation:** `{format_inr(review.modified_valuation, use_words=True)}`")
             else:
-                st.markdown(f"**Final Valuation:** `${review.original_valuation:,.0f}`")
+                st.markdown(f"**Final Valuation:** `{format_inr(review.original_valuation, use_words=True)}`")
 
         with c3:
-            st.markdown(f"**Original Rent:** `${review.original_recommended_rent:,.0f} / mo`")
+            st.markdown(f"**Original Rent:** `{format_rent(review.original_recommended_rent)}`")
             if review.modified_recommended_rent:
-                st.markdown(f"**Final Overridden Rent:** `${review.modified_recommended_rent:,.0f} / mo`")
+                st.markdown(f"**Final Overridden Rent:** `{format_rent(review.modified_recommended_rent)}`")
             else:
-                st.markdown(f"**Final Rent:** `${review.original_recommended_rent:,.0f} / mo`")
+                st.markdown(f"**Final Rent:** `{format_rent(review.original_recommended_rent)}`")
 
         st.markdown(f"**Reviewer Justification Notes:**")
         st.info(f"\"{review.reviewer_notes}\"")
@@ -81,22 +82,22 @@ def render_human_review_view(
 
     # Pending Review State
     st.warning(
-        "✋ **HUMAN APPROVAL REQUIRED:** Autonomous publication of valuations or rental prices is strictly prohibited. "
-        "A licensed analyst or asset manager must review the evidence below and approve, modify, or reject this recommendation."
+        "✋ **HUMAN APPROVAL REQUIRED:** Autonomous publication of valuations or rental prices is strictly prohibited under institutional governance. "
+        "A qualified asset manager or property analyst must review the evidence below and record an approval, modification, or rejection."
     )
 
     col_info1, col_info2 = st.columns(2)
     with col_info1:
         st.info(
-            f"**AI Valuation Estimate:** ${val.estimated_value:,.0f}\n\n"
-            f"Range: ${val.valuation_range_low:,.0f} – ${val.valuation_range_high:,.0f} (${val.valuation_psf:.0f}/sqft)\n\n"
+            f"**AI Valuation Estimate:** {format_inr(val.estimated_value, use_words=True)}\n\n"
+            f"Range: {format_inr(val.valuation_range_low)} – {format_inr(val.valuation_range_high)} ({format_psf(val.valuation_psf)})\n\n"
             f"Confidence: {val.confidence_level.value} ({val.confidence_score:.0f}/100)"
         )
     with col_info2:
         st.info(
-            f"**AI Recommended Rent:** ${pricing.recommended_midpoint:,.0f} / mo\n\n"
-            f"Range: ${pricing.recommended_rent_range_low:,.0f} – ${pricing.recommended_rent_range_high:,.0f} / mo\n\n"
-            f"In-Place Rent: ${pricing.current_in_place_rent or 0:,.0f} / mo"
+            f"**AI Recommended Rent:** {format_rent(pricing.recommended_midpoint)}\n\n"
+            f"Range: {format_inr(pricing.recommended_rent_range_low)} – {format_inr(pricing.recommended_rent_range_high)} / mo\n\n"
+            f"In-Place Rent: {format_rent(pricing.current_in_place_rent) if pricing.current_in_place_rent else 'Vacant / Unleased'}"
         )
 
     # Review Controls Tabs
@@ -109,10 +110,10 @@ def render_human_review_view(
         st.markdown("Accept the deterministic valuation and dynamic pricing as decision-support baseline.")
         c_a1, c_a2 = st.columns(2)
         with c_a1:
-            app_name = st.text_input("Reviewer Name", value="Alex Mercer", key="app_name")
+            app_name = st.text_input("Reviewer Name", value="Venkatesh Rao", key="app_name")
         with c_a2:
             app_role = st.text_input("Reviewer Role", value="Real Estate Investment Analyst", key="app_role")
-        app_notes = st.text_area("Audit Notes (Optional)", value="Reviewed and validated against local comps and rent roll.", key="app_notes")
+        app_notes = st.text_area("Audit Notes (Optional)", value="Reviewed and validated against municipal registry records, local comps, and rent roll.", key="app_notes")
 
         if st.button("🚀 Approve Recommendation", type="primary", key="btn_approve"):
             try:
@@ -133,13 +134,13 @@ def render_human_review_view(
         st.markdown("Modify the valuation or rental pricing with mandatory audit justification notes.")
         c_m1, c_m2 = st.columns(2)
         with c_m1:
-            mod_name = st.text_input("Reviewer Name", value="Alex Mercer", key="mod_name")
-            mod_val = st.number_input("Override Valuation ($)", value=float(val.estimated_value), step=5000.0, key="mod_val")
+            mod_name = st.text_input("Reviewer Name", value="Venkatesh Rao", key="mod_name")
+            mod_val = st.number_input("Override Valuation (₹)", value=float(val.estimated_value), step=100000.0, key="mod_val")
         with c_m2:
             mod_role = st.text_input("Reviewer Role", value="Senior Asset Manager", key="mod_role")
-            mod_rent = st.number_input("Override Recommended Rent ($/mo)", value=float(pricing.recommended_midpoint), step=50.0, key="mod_rent")
+            mod_rent = st.number_input("Override Recommended Rent (₹/mo)", value=float(pricing.recommended_midpoint), step=1000.0, key="mod_rent")
 
-        mod_notes = st.text_area("Mandatory Justification Notes*", placeholder="Explain reason for override (e.g. recent roof replacement, off-market lease comp)...", key="mod_notes")
+        mod_notes = st.text_area("Mandatory Justification Notes*", placeholder="Explain reason for override (e.g. premium corner balcony view, superior interior woodwork, recent Sub-Registrar transaction)...", key="mod_notes")
 
         if st.button("💾 Submit Modified Recommendation", type="primary", key="btn_modify"):
             try:
@@ -162,7 +163,7 @@ def render_human_review_view(
         st.markdown("Reject the recommendation and halt decision finalization.")
         c_r1, c_r2 = st.columns(2)
         with c_r1:
-            rej_name = st.text_input("Reviewer Name", value="Alex Mercer", key="rej_name")
+            rej_name = st.text_input("Reviewer Name", value="Venkatesh Rao", key="rej_name")
         with c_r2:
             rej_role = st.text_input("Reviewer Role", value="Chief Investment Officer", key="rej_role")
         rej_reason = st.text_area("Mandatory Rejection Rationale*", placeholder="State why this recommendation cannot be approved...", key="rej_reason")
@@ -186,12 +187,12 @@ def render_human_review_view(
         st.markdown("Signal the LangGraph multi-agent workflow to widen search radius and re-gather market evidence.")
         c_e1, c_e2 = st.columns(2)
         with c_e1:
-            ev_name = st.text_input("Reviewer Name", value="Alex Mercer", key="ev_name")
+            ev_name = st.text_input("Reviewer Name", value="Venkatesh Rao", key="ev_name")
         with c_e2:
             ev_role = st.text_input("Reviewer Role", value="Acquisition Analyst", key="ev_role")
         ev_details = st.text_area(
             "Evidence Gathering Directives*",
-            value="Expand comparable search radius by 1.5 miles and re-evaluate recent transactions.",
+            value="Expand comparable search radius by 2.0 km and re-evaluate recent transactions in adjacent sectors.",
             key="ev_details",
         )
 

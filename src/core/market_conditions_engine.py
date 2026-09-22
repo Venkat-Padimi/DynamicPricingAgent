@@ -39,7 +39,7 @@ class MarketConditionsEngine:
             annual_rent_g = 0.0
             current_yield = round(first.gross_rental_yield_pct, 2)
             trend_dir = MarketTrendDirection.STABLE
-            facts = f"Single data point available for {submarket_name} in {first.period}. Median sale PSF: ${first.median_sale_psf:,.2f}."
+            facts = f"Single data point available for {submarket_name} in {first.period}. Median sale PSF: ₹{first.median_sale_psf:,.2f}."
             interp = "Insufficient historical depth to evaluate macro trend direction."
             avg_inv = first.inventory_months
             avg_dom = float(first.avg_days_on_market)
@@ -91,8 +91,8 @@ class MarketConditionsEngine:
             # Factual summary (historical facts only)
             facts = (
                 f"Historical facts ({first.period} to {last.period}): Median sale PSF transitioned from "
-                f"${first.median_sale_psf:,.2f} to ${last.median_sale_psf:,.2f} ({annual_price_g:+.1f}% annualized). "
-                f"Median rent moved from ${first.median_rent_psf:,.2f}/sqft to ${last.median_rent_psf:,.2f}/sqft "
+                f"₹{first.median_sale_psf:,.2f} to ₹{last.median_sale_psf:,.2f} ({annual_price_g:+.1f}% annualized). "
+                f"Median rent moved from ₹{first.median_rent_psf:,.2f}/sqft to ₹{last.median_rent_psf:,.2f}/sqft "
                 f"({annual_rent_g:+.1f}% annualized). Trailing average inventory: {avg_inv} months; "
                 f"average DOM: {avg_dom:.0f} days. Current gross yield: {current_yield:.2f}%."
             )

@@ -26,7 +26,7 @@ from src.ui.components.valuation_view import render_valuation_view
 from src.workflow.graph import run_pipeline, submit_human_decision
 
 st.set_page_config(
-    page_title="Valuation & Pricing Intelligence Platform",
+    page_title="AI Real Estate Valuation & Dynamic Pricing (India)",
     page_icon="🏢",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -60,15 +60,16 @@ def main():
     st.markdown(
         """
         <div class="disclosure-banner">
-            ⚠️ <b>DATA INTEGRITY DISCLOSURE:</b> This platform operates with strictly labeled <b>Synthetic Demonstration Data</b>.
+            ⚠️ <b>DATA INTEGRITY DISCLOSURE:</b> This platform operates with strictly labeled <b>Synthetic Demonstration Data</b>
+            across Indian metropolitan markets (Hyderabad, Bengaluru, Mumbai, Pune, Visakhapatnam, Delhi NCR, Chennai).
             Values, transactions, and trends are mathematical fixtures for institutional demonstration and are not real market records.
-            This AI system is a decision-support tool and does not produce legally consequential or binding appraisals.
+            This AI system is a decision-support tool and does not produce legally consequential or registered valuations under Indian law.
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    st.title("🏢 Automated Valuation & Dynamic Pricing Intelligence")
+    st.title("🏢 AI Real Estate Valuation & Dynamic Pricing Intelligence (India)")
     st.caption("Autonomous multi-agent real-estate valuation, CMA adjustments, dynamic rental pricing, and enforced Human-in-the-Loop governance.")
 
     # 2. Sidebar Property Selection
@@ -108,9 +109,11 @@ def main():
         return
 
     # Subject Property Summary Banner
+    locality_str = f" ({profile.locality})" if profile.locality else ""
+    carpet_str = f", RERA Carpet: {profile.carpet_area_sqft:,.0f} sq ft" if profile.carpet_area_sqft else ""
     st.markdown(
-        f"#### Asset Under Analysis: **{profile.address}, {profile.city}, {profile.state} {profile.zip_code}** "
-        f"· `{profile.property_type.value}` ({profile.bedrooms}B/{profile.bathrooms:.0f}Ba, {profile.sqft:,.0f} sqft, Built {profile.year_built})"
+        f"#### Asset Under Analysis: **{profile.address}, {profile.city}, {profile.state} (PIN: {profile.zip_code})** "
+        f"· `{profile.property_type.value}` ({profile.bhk_display}, {profile.bathrooms:.0f} Bath, {profile.sqft:,.0f} sq ft built-up{locality_str}{carpet_str}, Built {profile.year_built})"
     )
 
     # Human Review Status Banner

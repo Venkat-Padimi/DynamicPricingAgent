@@ -11,17 +11,22 @@ class PropertyIntakeEngine:
     """Parses and normalizes raw user or API property inputs into validated PropertyProfile."""
 
     PROPERTY_TYPE_MAP = {
-        "single_family": PropertyType.SINGLE_FAMILY,
-        "singlefamily": PropertyType.SINGLE_FAMILY,
-        "house": PropertyType.SINGLE_FAMILY,
+        "apartment": PropertyType.APARTMENT,
+        "flat": PropertyType.APARTMENT,
         "condo": PropertyType.CONDO,
         "condominium": PropertyType.CONDO,
+        "independent_house": PropertyType.INDEPENDENT_HOUSE,
+        "house": PropertyType.INDEPENDENT_HOUSE,
+        "single_family": PropertyType.SINGLE_FAMILY,
+        "singlefamily": PropertyType.SINGLE_FAMILY,
+        "villa": PropertyType.VILLA,
+        "row_house": PropertyType.ROW_HOUSE,
         "townhouse": PropertyType.TOWNHOUSE,
         "townhome": PropertyType.TOWNHOUSE,
+        "plot": PropertyType.PLOT,
+        "commercial": PropertyType.COMMERCIAL,
         "multifamily": PropertyType.MULTI_FAMILY,
         "multi_family": PropertyType.MULTI_FAMILY,
-        "apartment": PropertyType.MULTI_FAMILY,
-        "commercial": PropertyType.COMMERCIAL,
     }
 
     CONDITION_MAP = {
@@ -41,9 +46,9 @@ class PropertyIntakeEngine:
         if isinstance(raw_type, PropertyType):
             return raw_type
         if not raw_type:
-            return PropertyType.SINGLE_FAMILY
+            return PropertyType.APARTMENT
         cleaned = str(raw_type).strip().lower().replace("-", "_").replace(" ", "_")
-        return cls.PROPERTY_TYPE_MAP.get(cleaned, PropertyType.SINGLE_FAMILY)
+        return cls.PROPERTY_TYPE_MAP.get(cleaned, PropertyType.APARTMENT)
 
     @classmethod
     def normalize_condition(cls, raw_condition: Any) -> PropertyCondition:
@@ -63,8 +68,9 @@ class PropertyIntakeEngine:
             raise ValueError("Property intake failed: 'address' is required.")
         if not raw_input.get("city"):
             raise ValueError("Property intake failed: 'city' is required.")
-        if not raw_input.get("zip_code"):
-            raise ValueError("Property intake failed: 'zip_code' is required.")
+        zip_val = raw_input.get("pin_code") or raw_input.get("zip_code")
+        if not zip_val:
+            raise ValueError("Property intake failed: 'pin_code' (or 'zip_code') is required.")
 
         try:
             sqft = float(raw_input["sqft"])
@@ -77,9 +83,11 @@ class PropertyIntakeEngine:
         prop_type = cls.normalize_property_type(raw_input.get("property_type"))
         condition = cls.normalize_condition(raw_input.get("condition"))
 
+        locality = str(raw_input["locality"]).strip() if raw_input.get("locality") else None
+        carpet_area = float(raw_input["carpet_area_sqft"]) if raw_input.get("carpet_area_sqft") else None
         bedrooms = int(raw_input.get("bedrooms", 2))
         bathrooms = float(raw_input.get("bathrooms", 2.0))
-        year_built = int(raw_input.get("year_built", 2018))
+        year_built = int(raw_input.get("year_built", 2020))
         lot_size = float(raw_input["lot_size_sqft"]) if raw_input.get("lot_size_sqft") else None
         amenities = [str(a).strip() for a in raw_input.get("amenities", []) if a]
         parking_spaces = int(raw_input.get("parking_spaces", 1))
@@ -103,10 +111,12 @@ class PropertyIntakeEngine:
             property_id=prop_id,
             address=str(raw_input["address"]).strip(),
             city=str(raw_input["city"]).strip(),
-            state=str(raw_input.get("state", "TX")).strip().upper(),
-            zip_code=str(raw_input["zip_code"]).strip(),
+            state=str(raw_input.get("state", "Telangana")).strip().upper() if len(str(raw_input.get("state", "")).strip()) == 2 else str(raw_input.get("state", "Telangana")).strip(),
+            zip_code=str(zip_val).strip(),
+            locality=locality,
             property_type=prop_type,
             sqft=sqft,
+            carpet_area_sqft=carpet_area,
             bedrooms=bedrooms,
             bathrooms=bathrooms,
             year_built=year_built,

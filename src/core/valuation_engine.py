@@ -54,12 +54,12 @@ class DeterministicValuationEngine:
             adj_prices = np.array([c.adjusted_price for c in eval_comps])
             cma_val = float(np.sum(sim_weights * adj_prices) / np.sum(sim_weights))
             key_drivers.append(
-                f"CMA weighted baseline of ${cma_val:,.0f} derived from {len(eval_comps)} "
-                f"comparable sales (median ${cma_analysis.adjusted_median_price:,.0f})"
+                f"CMA weighted baseline of ₹{cma_val:,.0f} derived from {len(eval_comps)} "
+                f"comparable sales (median ₹{cma_analysis.adjusted_median_price:,.0f})"
             )
         else:
             # Fallback when zero comps
-            fallback_psf = market_conditions.historical_points[-1].median_sale_psf if market_conditions and market_conditions.historical_points else 450.0
+            fallback_psf = market_conditions.historical_points[-1].median_sale_psf if market_conditions and market_conditions.historical_points else 7500.0
             cma_val = fallback_psf * subject.sqft
             limitations.append("Insufficient sales comparables; valuation defaulted to submarket average PSF.")
 
@@ -69,7 +69,7 @@ class DeterministicValuationEngine:
             trend_val = cma_val * (1.0 + mom_pct)
             key_drivers.append(
                 f"Submarket 6-month price momentum ({market_conditions.price_momentum_pct_6m:+.1f}%) "
-                f"contributed a trend valuation component of ${trend_val:,.0f}"
+                f"contributed a trend valuation component of ₹{trend_val:,.0f}"
             )
         else:
             trend_val = cma_val
@@ -82,7 +82,7 @@ class DeterministicValuationEngine:
             loc_factor = 1.0 - min(0.05, max(0.0, (avg_dist - 0.5) * 0.02))
             loc_val = cma_val * loc_factor
             if avg_dist <= 0.4:
-                key_drivers.append(f"Tight comparable proximity (avg {avg_dist:.2f} mi) reinforces micro-location stability.")
+                key_drivers.append(f"Tight comparable proximity (avg {avg_dist * 1.60934:.2f} km / {avg_dist:.2f} mi) reinforces micro-location stability.")
         else:
             loc_val = cma_val
 
@@ -101,7 +101,7 @@ class DeterministicValuationEngine:
             income_val = round(annual_rent / cap_yield, 2)
             has_income = True
             key_drivers.append(
-                f"Income capitalization value of ${income_val:,.0f} based on ${annual_rent:,.0f} "
+                f"Income capitalization value of ₹{income_val:,.0f} based on ₹{annual_rent:,.0f} "
                 f"annual gross rent capitalized at {market_conditions.current_gross_yield_pct:.2f}% gross yield"
             )
         else:
@@ -137,7 +137,7 @@ class DeterministicValuationEngine:
         else:
             quality_adj = 0.0
 
-        final_val = max(50000.0, round(raw_estimate + quality_adj, -2))
+        final_val = max(500000.0, round(raw_estimate + quality_adj, -3))
         val_psf = round(final_val / subject.sqft, 2)
 
         # Valuation Range calculation
@@ -149,8 +149,8 @@ class DeterministicValuationEngine:
             range_low = final_val * (1.0 - uncertainty_margin)
             range_high = final_val * (1.0 + uncertainty_margin)
 
-        range_low = round(range_low, -2)
-        range_high = round(range_high, -2)
+        range_low = round(range_low, -3)
+        range_high = round(range_high, -3)
 
         breakdown = ValuationComponentBreakdown(
             cma_sales_component=round(cma_val, 2),

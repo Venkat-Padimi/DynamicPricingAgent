@@ -64,12 +64,12 @@ def sample_comparable():
 
 
 def test_demo_properties_structure():
-    """Verify demo properties dictionary contains Austin, Seattle, and Miami fixtures."""
+    """Verify demo properties dictionary contains Indian flagship fixtures (Hyderabad, Bengaluru, Mumbai)."""
     assert len(DEMO_PROPERTIES) >= 3
     cities = [d["city"] for d in DEMO_PROPERTIES.values()]
-    assert "Austin" in cities
-    assert "Seattle" in cities
-    assert "Miami" in cities
+    assert "Hyderabad" in cities
+    assert "Bengaluru" in cities
+    assert "Mumbai" in cities
 
     for name, prop in DEMO_PROPERTIES.items():
         assert prop["sqft"] > 0

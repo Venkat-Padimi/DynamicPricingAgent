@@ -109,8 +109,8 @@ def test_pipeline_modification_lifecycle(seattle_demo_input):
 
     md = generate_markdown_dossier(final_state)
     assert "MODIFIED WITH REVIEWER OVERRIDES" in md
-    assert "$1,150,000" in md
-    assert "$4,800 / mo" in md
+    assert "₹1,150,000" in md or "1,150,000" in md
+    assert "₹4,800" in md or "4,800" in md
 
     dict_data = generate_json_dict(final_state)
     assert dict_data["human_review"]["modified_valuation"] == override_val

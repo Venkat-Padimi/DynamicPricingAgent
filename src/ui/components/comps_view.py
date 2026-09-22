@@ -5,6 +5,7 @@ from typing import List, Optional
 import pandas as pd
 import streamlit as st
 
+from src.core.formatters import format_inr, format_psf
 from src.core.models import ComparableProperty
 from src.ui.visualizations import plot_comps_scatter
 
@@ -14,7 +15,7 @@ def render_comps_view(
     subject_sqft: float,
     subject_estimated_val: Optional[float] = None,
 ) -> None:
-    """Render interactive comparables table and scatter visualization."""
+    """Render interactive comparables table and scatter visualization in INR."""
     st.markdown("### 🏘️ Comparable Properties (CMA)")
 
     if not comparables:
@@ -32,16 +33,16 @@ def render_comps_view(
             {
                 "Record ID": c.record.record_id,
                 "Address": c.record.address,
-                "Distance (mi)": f"{c.record.distance_miles:.2f}",
+                "Distance": f"{c.record.distance_km:.2f} km ({c.record.distance_miles:.2f} mi)",
                 "Similarity": f"{c.similarity_score * 100:.1f}%",
-                "Sale Price": f"${c.record.sale_price:,.0f}" if c.record.sale_price else "N/A",
-                "Comp PSF": f"${c.record.price_per_sqft:,.0f}",
-                "Living Area": f"{c.record.sqft:,.0f} sqft",
-                "Bed / Bath": f"{c.record.bedrooms}B / {c.record.bathrooms:.0f}Ba",
+                "Sale Price": format_inr(c.record.sale_price) if c.record.sale_price else "N/A",
+                "Comp PSF": format_psf(c.record.price_per_sqft),
+                "Built-up Area": f"{c.record.sqft:,.0f} sq ft",
+                "Layout": f"{c.record.bhk_display} / {c.record.bathrooms:.0f} Bath",
                 "Year Built": c.record.year_built,
-                "Net Adjustment": f"${c.total_net_adjustment:+,.0f}",
-                "Adjusted Price": f"${c.adjusted_price:,.0f}",
-                "Adjusted PSF": f"${c.adjusted_price_psf:,.0f}",
+                "Net Adjustment": f"₹{c.total_net_adjustment:+,.0f}",
+                "Adjusted Price": format_inr(c.adjusted_price),
+                "Adjusted PSF": format_psf(c.adjusted_price_psf),
                 "Outlier?": "⚠️ OUTLIER" if c.is_outlier else "Normal",
                 "Data Origin": c.record.data_origin.value,
             }

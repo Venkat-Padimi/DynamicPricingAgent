@@ -4,12 +4,35 @@ from enum import Enum
 
 
 class PropertyType(str, Enum):
-    """Normalized residential and commercial property types."""
+    """Normalized residential and commercial property types for Indian and global real estate."""
+    APARTMENT = "Apartment"
+    INDEPENDENT_HOUSE = "IndependentHouse"
+    VILLA = "Villa"
+    ROW_HOUSE = "RowHouse"
+    PLOT = "Plot"
+    COMMERCIAL = "Commercial"
+    # Legacy aliases
     SINGLE_FAMILY = "SingleFamily"
     CONDO = "Condo"
     TOWNHOUSE = "Townhouse"
     MULTI_FAMILY = "MultiFamily"
-    COMMERCIAL = "Commercial"
+
+    @property
+    def display_name(self) -> str:
+        """Indian real-estate market user-facing display label."""
+        mapping = {
+            "Apartment": "Apartment / Flat",
+            "Condo": "Apartment / Flat",
+            "IndependentHouse": "Independent House / Villa",
+            "SingleFamily": "Independent House / Villa",
+            "Villa": "Villa / Row House",
+            "Townhouse": "Villa / Row House",
+            "RowHouse": "Villa / Row House",
+            "MultiFamily": "Residential Complex",
+            "Commercial": "Commercial",
+            "Plot": "Residential Plot",
+        }
+        return mapping.get(self.value, self.value)
 
 
 class PropertyCondition(str, Enum):

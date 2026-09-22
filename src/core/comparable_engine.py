@@ -106,13 +106,13 @@ class AdjustmentEngine:
     If subject is inferior, comp price is adjusted DOWN (-).
     """
 
-    SQFT_ADJUSTMENT_RATE = 150.0  # $ per sqft
-    BEDROOM_ADJUSTMENT_RATE = 15000.0  # $ per bedroom
-    BATHROOM_ADJUSTMENT_RATE = 10000.0  # $ per full bathroom
-    AGE_ADJUSTMENT_RATE = 1500.0  # $ per year of age difference
-    CONDITION_ADJUSTMENT_RATE = 12000.0  # $ per condition rank step
-    PARKING_ADJUSTMENT_RATE = 8000.0  # $ per parking space
-    AMENITY_ITEM_VALUE = 8000.0  # $ per key amenity difference
+    SQFT_ADJUSTMENT_RATE = 2500.0  # ₹ per sq ft
+    BEDROOM_ADJUSTMENT_RATE = 500000.0  # ₹ per bedroom
+    BATHROOM_ADJUSTMENT_RATE = 200000.0  # ₹ per full bathroom
+    AGE_ADJUSTMENT_RATE = 35000.0  # ₹ per year of age difference
+    CONDITION_ADJUSTMENT_RATE = 250000.0  # ₹ per condition rank step
+    PARKING_ADJUSTMENT_RATE = 200000.0  # ₹ per parking space
+    AMENITY_ITEM_VALUE = 150000.0  # ₹ per key amenity difference
 
     @classmethod
     def calculate_adjustments(
@@ -243,8 +243,8 @@ class AdjustmentEngine:
             )
 
         total_net_adjustment = sum(a.adjustment_amount for a in adjustments)
-        base_price = comp.sale_price or (comp.monthly_rent * 180.0 if comp.monthly_rent else 0.0)
-        adjusted_price = max(10000.0, base_price + total_net_adjustment)
+        base_price = comp.sale_price or (comp.monthly_rent * 240.0 if comp.monthly_rent else 0.0)
+        adjusted_price = max(500000.0, base_price + total_net_adjustment)
 
         return adjustments, total_net_adjustment, round(adjusted_price, 2)
 
@@ -325,9 +325,9 @@ class CMAEngine:
             # Plain-language selection rationale
             rationale = (
                 f"Selected with {sim_score * 100:.1f}% similarity. "
-                f"Located {record.distance_miles:.2f} miles away. "
-                f"{record.bedrooms}B/{record.bathrooms}Ba, {record.sqft:,.0f} sqft, built {record.year_built}. "
-                f"Net adjustment: {net_adj:+,.0f} (adjusted price: ${adj_price:,.0f})."
+                f"Located {record.distance_km:.2f} km ({record.distance_miles:.2f} miles) away. "
+                f"{record.bhk_display}/{record.bathrooms:.0f}Bath, {record.sqft:,.0f} sq ft, built {record.year_built}. "
+                f"Net adjustment: ₹{net_adj:+,.0f} (adjusted price: ₹{adj_price:,.0f})."
             )
 
             comp_prop = ComparableProperty(
