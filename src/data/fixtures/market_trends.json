@@ -1,0 +1,93 @@
+{
+  "Austin-Downtown": {
+    "submarket_name": "Austin-Downtown",
+    "time_horizon_months": 24,
+    "annual_price_growth_rate": 3.8,
+    "annual_rent_growth_rate": 4.2,
+    "current_gross_yield_pct": 6.35,
+    "trend_direction": "APPRECIATING",
+    "factual_summary": "Recorded 24-month median sales PSF rose from $482/sqft in Jan 2024 to $508/sqft in Dec 2025 (+5.4% cumulative). Median rent moved from $2.55/sqft to $2.70/sqft. Average inventory averaged 2.4 months.",
+    "agent_interpretation": "Austin downtown submarket indicates stable absorption post-2023 supply influx. Rental yield at 6.35% provides healthy cash flow coverage for multifamily and condo assets.",
+    "data_origin": "SYNTHETIC DEMONSTRATION DATA",
+    "provenance": {
+      "source": "Synthetic Demonstration Provider v1.0",
+      "origin": "SYNTHETIC DEMONSTRATION DATA",
+      "notice": "Synthetic demonstration data — not real market data.",
+      "record_id": "TREND-ATX-DT"
+    },
+    "historical_points": [
+      { "period": "2024-01", "median_sale_price": 550000.0, "median_sale_psf": 482.0, "median_monthly_rent": 2900.0, "median_rent_psf": 2.55, "sales_volume": 42, "avg_days_on_market": 38, "inventory_months": 2.8, "gross_rental_yield_pct": 6.33 },
+      { "period": "2024-02", "median_sale_price": 552000.0, "median_sale_psf": 484.0, "median_monthly_rent": 2920.0, "median_rent_psf": 2.56, "sales_volume": 45, "avg_days_on_market": 36, "inventory_months": 2.7, "gross_rental_yield_pct": 6.35 },
+      { "period": "2024-03", "median_sale_price": 555000.0, "median_sale_psf": 486.0, "median_monthly_rent": 2940.0, "median_rent_psf": 2.57, "sales_volume": 51, "avg_days_on_market": 33, "inventory_months": 2.6, "gross_rental_yield_pct": 6.36 },
+      { "period": "2024-04", "median_sale_price": 558000.0, "median_sale_psf": 488.0, "median_monthly_rent": 2960.0, "median_rent_psf": 2.59, "sales_volume": 58, "avg_days_on_market": 29, "inventory_months": 2.5, "gross_rental_yield_pct": 6.36 },
+      { "period": "2024-05", "median_sale_price": 560000.0, "median_sale_psf": 490.0, "median_monthly_rent": 2980.0, "median_rent_psf": 2.60, "sales_volume": 62, "avg_days_on_market": 27, "inventory_months": 2.4, "gross_rental_yield_pct": 6.39 },
+      { "period": "2024-06", "median_sale_price": 562000.0, "median_sale_psf": 491.0, "median_monthly_rent": 3000.0, "median_rent_psf": 2.62, "sales_volume": 60, "avg_days_on_market": 28, "inventory_months": 2.4, "gross_rental_yield_pct": 6.41 },
+      { "period": "2024-07", "median_sale_price": 564000.0, "median_sale_psf": 492.0, "median_monthly_rent": 3020.0, "median_rent_psf": 2.63, "sales_volume": 56, "avg_days_on_market": 29, "inventory_months": 2.5, "gross_rental_yield_pct": 6.43 },
+      { "period": "2024-08", "median_sale_price": 565000.0, "median_sale_psf": 493.0, "median_monthly_rent": 3030.0, "median_rent_psf": 2.64, "sales_volume": 54, "avg_days_on_market": 30, "inventory_months": 2.5, "gross_rental_yield_pct": 6.44 },
+      { "period": "2024-09", "median_sale_price": 563000.0, "median_sale_psf": 492.0, "median_monthly_rent": 3020.0, "median_rent_psf": 2.63, "sales_volume": 48, "avg_days_on_market": 32, "inventory_months": 2.6, "gross_rental_yield_pct": 6.44 },
+      { "period": "2024-10", "median_sale_price": 565000.0, "median_sale_psf": 493.0, "median_monthly_rent": 3030.0, "median_rent_psf": 2.64, "sales_volume": 44, "avg_days_on_market": 34, "inventory_months": 2.6, "gross_rental_yield_pct": 6.44 },
+      { "period": "2024-11", "median_sale_price": 566000.0, "median_sale_psf": 494.0, "median_monthly_rent": 3040.0, "median_rent_psf": 2.65, "sales_volume": 39, "avg_days_on_market": 37, "inventory_months": 2.7, "gross_rental_yield_pct": 6.44 },
+      { "period": "2024-12", "median_sale_price": 568000.0, "median_sale_psf": 495.0, "median_monthly_rent": 3050.0, "median_rent_psf": 2.66, "sales_volume": 36, "avg_days_on_market": 39, "inventory_months": 2.8, "gross_rental_yield_pct": 6.44 },
+      { "period": "2025-01", "median_sale_price": 569000.0, "median_sale_psf": 496.0, "median_monthly_rent": 3060.0, "median_rent_psf": 2.66, "sales_volume": 38, "avg_days_on_market": 35, "inventory_months": 2.7, "gross_rental_yield_pct": 6.45 },
+      { "period": "2025-02", "median_sale_price": 571000.0, "median_sale_psf": 498.0, "median_monthly_rent": 3075.0, "median_rent_psf": 2.67, "sales_volume": 44, "avg_days_on_market": 32, "inventory_months": 2.5, "gross_rental_yield_pct": 6.46 },
+      { "period": "2025-03", "median_sale_price": 574000.0, "median_sale_psf": 500.0, "median_monthly_rent": 3090.0, "median_rent_psf": 2.68, "sales_volume": 53, "avg_days_on_market": 28, "inventory_months": 2.4, "gross_rental_yield_pct": 6.46 },
+      { "period": "2025-04", "median_sale_price": 576000.0, "median_sale_psf": 501.0, "median_monthly_rent": 3110.0, "median_rent_psf": 2.69, "sales_volume": 59, "avg_days_on_market": 25, "inventory_months": 2.3, "gross_rental_yield_pct": 6.48 },
+      { "period": "2025-05", "median_sale_price": 579000.0, "median_sale_psf": 503.0, "median_monthly_rent": 3130.0, "median_rent_psf": 2.70, "sales_volume": 64, "avg_days_on_market": 23, "inventory_months": 2.2, "gross_rental_yield_pct": 6.49 },
+      { "period": "2025-06", "median_sale_price": 582000.0, "median_sale_psf": 505.0, "median_monthly_rent": 3150.0, "median_rent_psf": 2.71, "sales_volume": 61, "avg_days_on_market": 24, "inventory_months": 2.3, "gross_rental_yield_pct": 6.50 },
+      { "period": "2025-07", "median_sale_price": 583000.0, "median_sale_psf": 506.0, "median_monthly_rent": 3160.0, "median_rent_psf": 2.72, "sales_volume": 57, "avg_days_on_market": 26, "inventory_months": 2.3, "gross_rental_yield_pct": 6.50 },
+      { "period": "2025-08", "median_sale_price": 584000.0, "median_sale_psf": 506.0, "median_monthly_rent": 3165.0, "median_rent_psf": 2.72, "sales_volume": 52, "avg_days_on_market": 27, "inventory_months": 2.4, "gross_rental_yield_pct": 6.50 },
+      { "period": "2025-09", "median_sale_price": 582000.0, "median_sale_psf": 505.0, "median_monthly_rent": 3150.0, "median_rent_psf": 2.71, "sales_volume": 49, "avg_days_on_market": 29, "inventory_months": 2.4, "gross_rental_yield_pct": 6.49 },
+      { "period": "2025-10", "median_sale_price": 584000.0, "median_sale_psf": 506.0, "median_monthly_rent": 3170.0, "median_rent_psf": 2.72, "sales_volume": 45, "avg_days_on_market": 30, "inventory_months": 2.5, "gross_rental_yield_pct": 6.51 },
+      { "period": "2025-11", "median_sale_price": 585000.0, "median_sale_psf": 507.0, "median_monthly_rent": 3180.0, "median_rent_psf": 2.73, "sales_volume": 41, "avg_days_on_market": 31, "inventory_months": 2.5, "gross_rental_yield_pct": 6.52 },
+      { "period": "2025-12", "median_sale_price": 587000.0, "median_sale_psf": 508.0, "median_monthly_rent": 3200.0, "median_rent_psf": 2.74, "sales_volume": 38, "avg_days_on_market": 33, "inventory_months": 2.6, "gross_rental_yield_pct": 6.54 }
+    ]
+  },
+  "Seattle-Urban": {
+    "submarket_name": "Seattle-Urban",
+    "time_horizon_months": 24,
+    "annual_price_growth_rate": 4.5,
+    "annual_rent_growth_rate": 4.8,
+    "current_gross_yield_pct": 5.75,
+    "trend_direction": "APPRECIATING",
+    "factual_summary": "Seattle Capitol Hill/Urban core 24-month median sales PSF climbed from $635/sqft to $665/sqft. Average inventory maintained tight 1.8 months with strong tech employment demand.",
+    "agent_interpretation": "Demand remains structurally constrained by land geography. Rental rate appreciation outpaces inflation; default exposure remains low.",
+    "data_origin": "SYNTHETIC DEMONSTRATION DATA",
+    "provenance": {
+      "source": "Synthetic Demonstration Provider v1.0",
+      "origin": "SYNTHETIC DEMONSTRATION DATA",
+      "notice": "Synthetic demonstration data — not real market data.",
+      "record_id": "TREND-SEA-URBAN"
+    },
+    "historical_points": [
+      { "period": "2024-01", "median_sale_price": 690000.0, "median_sale_psf": 635.0, "median_monthly_rent": 3200.0, "median_rent_psf": 2.95, "sales_volume": 32, "avg_days_on_market": 25, "inventory_months": 2.1, "gross_rental_yield_pct": 5.57 },
+      { "period": "2024-06", "median_sale_price": 710000.0, "median_sale_psf": 648.0, "median_monthly_rent": 3320.0, "median_rent_psf": 3.05, "sales_volume": 44, "avg_days_on_market": 18, "inventory_months": 1.9, "gross_rental_yield_pct": 5.61 },
+      { "period": "2024-12", "median_sale_price": 718000.0, "median_sale_psf": 652.0, "median_monthly_rent": 3380.0, "median_rent_psf": 3.10, "sales_volume": 29, "avg_days_on_market": 26, "inventory_months": 2.0, "gross_rental_yield_pct": 5.65 },
+      { "period": "2025-06", "median_sale_price": 735000.0, "median_sale_psf": 662.0, "median_monthly_rent": 3480.0, "median_rent_psf": 3.18, "sales_volume": 48, "avg_days_on_market": 16, "inventory_months": 1.7, "gross_rental_yield_pct": 5.68 },
+      { "period": "2025-12", "median_sale_price": 745000.0, "median_sale_psf": 665.0, "median_monthly_rent": 3550.0, "median_rent_psf": 3.22, "sales_volume": 35, "avg_days_on_market": 21, "inventory_months": 1.8, "gross_rental_yield_pct": 5.72 }
+    ]
+  },
+  "Miami-Brickell": {
+    "submarket_name": "Miami-Brickell",
+    "time_horizon_months": 24,
+    "annual_price_growth_rate": 6.2,
+    "annual_rent_growth_rate": 5.9,
+    "current_gross_yield_pct": 6.20,
+    "trend_direction": "APPRECIATING",
+    "factual_summary": "Brickell luxury corridor median sales PSF expanded from $670/sqft to $715/sqft over 24 months, supported by financial firm relocations and international wealth inflows.",
+    "agent_interpretation": "High-end luxury market shows resilient purchasing power; however, HOA insurance cost escalation is becoming a valuation friction factor.",
+    "data_origin": "SYNTHETIC DEMONSTRATION DATA",
+    "provenance": {
+      "source": "Synthetic Demonstration Provider v1.0",
+      "origin": "SYNTHETIC DEMONSTRATION DATA",
+      "notice": "Synthetic demonstration data — not real market data.",
+      "record_id": "TREND-MIA-BRICKELL"
+    },
+    "historical_points": [
+      { "period": "2024-01", "median_sale_price": 760000.0, "median_sale_psf": 670.0, "median_monthly_rent": 3800.0, "median_rent_psf": 3.35, "sales_volume": 38, "avg_days_on_market": 35, "inventory_months": 3.2, "gross_rental_yield_pct": 6.00 },
+      { "period": "2024-06", "median_sale_price": 785000.0, "median_sale_psf": 688.0, "median_monthly_rent": 3950.0, "median_rent_psf": 3.48, "sales_volume": 46, "avg_days_on_market": 28, "inventory_months": 2.9, "gross_rental_yield_pct": 6.04 },
+      { "period": "2024-12", "median_sale_price": 798000.0, "median_sale_psf": 698.0, "median_monthly_rent": 4050.0, "median_rent_psf": 3.55, "sales_volume": 34, "avg_days_on_market": 32, "inventory_months": 3.0, "gross_rental_yield_pct": 6.09 },
+      { "period": "2025-06", "median_sale_price": 815000.0, "median_sale_psf": 710.0, "median_monthly_rent": 4180.0, "median_rent_psf": 3.65, "sales_volume": 52, "avg_days_on_market": 24, "inventory_months": 2.7, "gross_rental_yield_pct": 6.15 },
+      { "period": "2025-12", "median_sale_price": 825000.0, "median_sale_psf": 715.0, "median_monthly_rent": 4250.0, "median_rent_psf": 3.70, "sales_volume": 40, "avg_days_on_market": 29, "inventory_months": 2.8, "gross_rental_yield_pct": 6.18 }
+    ]
+  }
+}
